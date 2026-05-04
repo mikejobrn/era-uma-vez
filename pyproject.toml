@@ -1,0 +1,23 @@
+[project]
+name = "era-uma-vez"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.5.0",
+    "torchvision>=0.20.0",
+    "diffusers>=0.30.0",
+    "transformers>=4.40.0",
+    "accelerate>=0.30.0",
+    "safetensors>=0.4.0",
+    "Pillow>=10.0.0",
+    "reportlab>=4.0",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }

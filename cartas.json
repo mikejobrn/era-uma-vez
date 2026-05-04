@@ -1,0 +1,1652 @@
+[
+  {
+    "id": "A01",
+    "deck": "A",
+    "numero": 1,
+    "tipo": "Evento",
+    "texto_en": "Contest",
+    "texto_pt": "Competição",
+    "interrupt": false,
+    "prompt_en": "two armored knights jousting on horseback in a medieval arena, lances raised"
+  },
+  {
+    "id": "A02",
+    "deck": "A",
+    "numero": 2,
+    "tipo": "Evento",
+    "texto_en": "Escaping",
+    "texto_pt": "Fuga",
+    "interrupt": false,
+    "prompt_en": "a cloaked figure escaping down a rope from a moonlit castle wall, the dark moat far below"
+  },
+  {
+    "id": "A03",
+    "deck": "A",
+    "numero": 3,
+    "tipo": "Evento",
+    "texto_en": "Fighting",
+    "texto_pt": "Luta",
+    "interrupt": false,
+    "prompt_en": "two knights clashing swords in a crumbling stone hall, sparks flying, torn battle banners hanging above"
+  },
+  {
+    "id": "A04",
+    "deck": "A",
+    "numero": 4,
+    "tipo": "Evento",
+    "texto_en": "Chasing",
+    "texto_pt": "Perseguição",
+    "interrupt": false,
+    "prompt_en": "a frightened man fleeing through a dark medieval forest at night, hounds and torch-bearing villagers in pursuit"
+  },
+  {
+    "id": "A05",
+    "deck": "A",
+    "numero": 5,
+    "tipo": "Evento",
+    "texto_en": "Someone is Hurt",
+    "texto_pt": "Alguém se Machuca",
+    "interrupt": false,
+    "prompt_en": "an injured man lying on a stone floor with expression of pain and tears in his eyes"
+  },
+  {
+    "id": "A06",
+    "deck": "A",
+    "numero": 6,
+    "tipo": "Evento",
+    "texto_en": "Imprisoned",
+    "texto_pt": "Aprisionado",
+    "interrupt": false,
+    "prompt_en": "a chained prisoner behind iron bars on a dungeon floor"
+  },
+  {
+    "id": "A07",
+    "deck": "A",
+    "numero": 7,
+    "tipo": "Evento",
+    "texto_en": "This Breaks",
+    "texto_pt": "Algo se Quebra",
+    "interrupt": false,
+    "prompt_en": "a tall ornate mirror shattering into glowing shards, magical energy dispersing in a dim stone chamber"
+  },
+  {
+    "id": "A08",
+    "deck": "A",
+    "numero": 8,
+    "tipo": "Evento",
+    "texto_en": "Rescued",
+    "texto_pt": "Resgatado",
+    "interrupt": true,
+    "prompt_en": "an armored hero reaching through a tower window to rescue a captive, a dragon circling in the stormy sky"
+  },
+  {
+    "id": "A09",
+    "deck": "A",
+    "numero": 9,
+    "tipo": "Coisa",
+    "texto_en": "Food",
+    "texto_pt": "Comida",
+    "interrupt": false,
+    "prompt_en": "a long feast table laden with roasted meats, pies and wine goblets in a candlelit medieval hall"
+  },
+  {
+    "id": "A10",
+    "deck": "A",
+    "numero": 10,
+    "tipo": "Coisa",
+    "texto_en": "Ring",
+    "texto_pt": "Anel",
+    "interrupt": false,
+    "prompt_en": "an ornate golden ring on a velvet cushion, its gemstone glowing with magical light, ancient runes on the band"
+  },
+  {
+    "id": "A11",
+    "deck": "A",
+    "numero": 11,
+    "tipo": "Coisa",
+    "texto_en": "Sword",
+    "texto_pt": "Espada",
+    "interrupt": false,
+    "prompt_en": "a legendary sword plunged into a mossy stone in a forest clearing, glowing runes on the blade"
+  },
+  {
+    "id": "A12",
+    "deck": "A",
+    "numero": 12,
+    "tipo": "Coisa",
+    "texto_en": "Trap",
+    "texto_pt": "Armadilha",
+    "interrupt": false,
+    "prompt_en": "trap box with a carrot underneath"
+  },
+  {
+    "id": "A13",
+    "deck": "A",
+    "numero": 13,
+    "tipo": "Coisa",
+    "texto_en": "Key",
+    "texto_pt": "Chave",
+    "interrupt": true,
+    "prompt_en": "an ornate golden key on a stone shelf, magical light pulsing from it, a locked iron door behind"
+  },
+  {
+    "id": "A14",
+    "deck": "A",
+    "numero": 14,
+    "tipo": "Coisa",
+    "texto_en": "Crown",
+    "texto_pt": "Coroa",
+    "interrupt": true,
+    "prompt_en": "a jeweled golden crown on a velvet pedestal in a treasure chamber, candlelight catching each gem"
+  },
+  {
+    "id": "A15",
+    "deck": "A",
+    "numero": 15,
+    "tipo": "Coisa",
+    "texto_en": "Treasure",
+    "texto_pt": "Tesouro",
+    "interrupt": true,
+    "prompt_en": "an open treasure chest overflowing with gold coins and jewels in a torchlit cavern, light pouring within"
+  },
+  {
+    "id": "A16",
+    "deck": "A",
+    "numero": 16,
+    "tipo": "Aspecto",
+    "texto_en": "Beautiful",
+    "texto_pt": "Belo(a)",
+    "interrupt": false,
+    "prompt_en": "a radiant young noblewoman in a silk gown in a palace garden, flower petals drifting, birds on her hand"
+  },
+  {
+    "id": "A17",
+    "deck": "A",
+    "numero": 17,
+    "tipo": "Aspecto",
+    "texto_en": "Brave",
+    "texto_pt": "Corajoso(a)",
+    "interrupt": false,
+    "prompt_en": "a young hero at a cliff's edge, sword raised against a lightning storm, cape billowing in the wind"
+  },
+  {
+    "id": "A18",
+    "deck": "A",
+    "numero": 18,
+    "tipo": "Aspecto",
+    "texto_en": "Disguised",
+    "texto_pt": "Disfarçado(a)",
+    "interrupt": false,
+    "prompt_en": "a masked figure among nobles at a candlelit masquerade ball, one watchful eye visible beneath the disguise"
+  },
+  {
+    "id": "A19",
+    "deck": "A",
+    "numero": 19,
+    "tipo": "Aspecto",
+    "texto_en": "Hidden",
+    "texto_pt": "Escondido(a)",
+    "interrupt": false,
+    "prompt_en": "hidden passage in a room of a castle, revealed by a loose stone"
+  },
+  {
+    "id": "A20",
+    "deck": "A",
+    "numero": 20,
+    "tipo": "Aspecto",
+    "texto_en": "Healed",
+    "texto_pt": "Curado(a)",
+    "interrupt": false,
+    "prompt_en": "a healer raising their hands over a kneeling wounded traveler, golden light sealing the injury"
+  },
+  {
+    "id": "A21",
+    "deck": "A",
+    "numero": 21,
+    "tipo": "Aspecto",
+    "texto_en": "Stolen",
+    "texto_pt": "Roubado(a)",
+    "interrupt": false,
+    "prompt_en": "a thief in dark clothes slipping through a palace window at night, holding a jewel"
+  },
+  {
+    "id": "A22",
+    "deck": "A",
+    "numero": 22,
+    "tipo": "Aspecto",
+    "texto_en": "Wise",
+    "texto_pt": "Sábio(a)",
+    "interrupt": false,
+    "prompt_en": "an ancient sage with a silver beard at a cluttered desk, surrounded by scrolls and arcane tomes"
+  },
+  {
+    "id": "A23",
+    "deck": "A",
+    "numero": 23,
+    "tipo": "Aspecto",
+    "texto_en": "Secret",
+    "texto_pt": "Secreto(a)",
+    "interrupt": true,
+    "prompt_en": "a folded parchment letter with a glowing wax seal on a stone windowsill, the secret within straining to escape"
+  },
+  {
+    "id": "A24",
+    "deck": "A",
+    "numero": 24,
+    "tipo": "Lugar",
+    "texto_en": "City",
+    "texto_pt": "Cidade",
+    "interrupt": false,
+    "prompt_en": "a medieval walled city with towers and spires, merchants through the gatehouse, banners lining cobbled streets"
+  },
+  {
+    "id": "A25",
+    "deck": "A",
+    "numero": 25,
+    "tipo": "Lugar",
+    "texto_en": "Dungeon",
+    "texto_pt": "Masmorra",
+    "interrupt": false,
+    "prompt_en": "a dark dungeon with dripping stone walls, iron chains, barred cells in shadow, a single torch"
+  },
+  {
+    "id": "A26",
+    "deck": "A",
+    "numero": 26,
+    "tipo": "Lugar",
+    "texto_en": "Garden",
+    "texto_pt": "Jardim",
+    "interrupt": false,
+    "prompt_en": "an enchanted palace garden with glowing flowers, a stone fountain, fireflies at twilight, a crescent moon above"
+  },
+  {
+    "id": "A27",
+    "deck": "A",
+    "numero": 27,
+    "tipo": "Lugar",
+    "texto_en": "Palace",
+    "texto_pt": "Palácio",
+    "interrupt": false,
+    "prompt_en": "a royal palace with golden spires rising at sunset"
+  },
+  {
+    "id": "A28",
+    "deck": "A",
+    "numero": 28,
+    "tipo": "Lugar",
+    "texto_en": "Road",
+    "texto_pt": "Estrada",
+    "interrupt": false,
+    "prompt_en": "a winding cobblestone road through rolling green hills, wildflowers at the verge, a village steeple on the horizon"
+  },
+  {
+    "id": "A29",
+    "deck": "A",
+    "numero": 29,
+    "tipo": "Lugar",
+    "texto_en": "Tower",
+    "texto_pt": "Torre",
+    "interrupt": false,
+    "prompt_en": "a solitary stone tower on a rocky outcrop, its topmost window glowing, ivy on the walls, ravens in the mist"
+  },
+  {
+    "id": "A30",
+    "deck": "A",
+    "numero": 30,
+    "tipo": "Lugar",
+    "texto_en": "Church",
+    "texto_pt": "Igreja",
+    "interrupt": true,
+    "prompt_en": "a gothic church"
+  },
+  {
+    "id": "A31",
+    "deck": "A",
+    "numero": 31,
+    "tipo": "Personagem",
+    "texto_en": "King",
+    "texto_pt": "Rei",
+    "interrupt": false,
+    "prompt_en": "a powerful king in royal robes on a golden throne, crown and scepter, kneeling courtiers around him"
+  },
+  {
+    "id": "A32",
+    "deck": "A",
+    "numero": 32,
+    "tipo": "Personagem",
+    "texto_en": "Prince",
+    "texto_pt": "Príncipe",
+    "interrupt": false,
+    "prompt_en": "a young prince in silver armor with a scarlet cape, astride a white horse before a castle gate"
+  },
+  {
+    "id": "A33",
+    "deck": "A",
+    "numero": 33,
+    "tipo": "Personagem",
+    "texto_en": "Princess",
+    "texto_pt": "Princesa",
+    "interrupt": false,
+    "prompt_en": "a graceful princess in a silk gown at a tower window, gazing at the kingdom below in golden light"
+  },
+  {
+    "id": "A34",
+    "deck": "A",
+    "numero": 34,
+    "tipo": "Personagem",
+    "texto_en": "Queen",
+    "texto_pt": "Rainha",
+    "interrupt": false,
+    "prompt_en": "a regal queen in blue velvet robes and silver crown, nobles bowing at her sides in the royal court"
+  },
+  {
+    "id": "A35",
+    "deck": "A",
+    "numero": 35,
+    "tipo": "Personagem",
+    "texto_en": "Guard",
+    "texto_pt": "Guarda",
+    "interrupt": false,
+    "prompt_en": "an armored guard in chainmail and crested helmet at the castle gate, spear in hand, torch beside them"
+  },
+  {
+    "id": "A36",
+    "deck": "A",
+    "numero": 36,
+    "tipo": "Personagem",
+    "texto_en": "Cook",
+    "texto_pt": "Cozinheiro(a)",
+    "interrupt": false,
+    "prompt_en": "a jovial cook in an apron stirring a bubbling cauldron in a medieval kitchen, copper pots hanging above"
+  },
+  {
+    "id": "A37",
+    "deck": "A",
+    "numero": 37,
+    "tipo": "Personagem",
+    "texto_en": "Enemy",
+    "texto_pt": "Inimigo(a)",
+    "interrupt": true,
+    "prompt_en": "a towering figure in black spiked armor with glowing red eyes, emerging from dark smoke, shadows behind"
+  },
+  {
+    "id": "A38",
+    "deck": "A",
+    "numero": 38,
+    "tipo": "Personagem",
+    "texto_en": "Thief",
+    "texto_pt": "Ladrão(oa)",
+    "interrupt": true,
+    "prompt_en": "a thief pressed flat against a stone wall in a lamplit alley, a stolen jeweled pouch under one arm"
+  },
+  {
+    "id": "B01",
+    "deck": "B",
+    "numero": 1,
+    "tipo": "Evento",
+    "texto_en": "Arguing",
+    "texto_pt": "Discussão",
+    "interrupt": false,
+    "prompt_en": "two medieval peasants arguing in a village square, bystanders watching from doorways, a dog barking at their feet"
+  },
+  {
+    "id": "B02",
+    "deck": "B",
+    "numero": 2,
+    "tipo": "Evento",
+    "texto_en": "Sleeping",
+    "texto_pt": "Dormindo",
+    "interrupt": false,
+    "prompt_en": "a medieval peasant sleeping in a straw bed, golden dream visions of castles floating above their head"
+  },
+  {
+    "id": "B03",
+    "deck": "B",
+    "numero": 3,
+    "tipo": "Evento",
+    "texto_en": "Falling in Love",
+    "texto_pt": "Apaixonando-se",
+    "interrupt": false,
+    "prompt_en": "two young people in robes gazing at each other in a moonlit garden, rose petals and magical hearts between them"
+  },
+  {
+    "id": "B04",
+    "deck": "B",
+    "numero": 4,
+    "tipo": "Evento",
+    "texto_en": "Making Mischief",
+    "texto_pt": "Travessura",
+    "interrupt": false,
+    "prompt_en": "a child wearing a mask to spook a friend in a medieval village, hiding behind a barrel"
+  },
+  {
+    "id": "B05",
+    "deck": "B",
+    "numero": 5,
+    "tipo": "Evento",
+    "texto_en": "Meeting",
+    "texto_pt": "Encontro",
+    "interrupt": false,
+    "prompt_en": "two friends shaking hands in a medieval village square, smiling"
+  },
+  {
+    "id": "B06",
+    "deck": "B",
+    "numero": 6,
+    "tipo": "Evento",
+    "texto_en": "Planning",
+    "texto_pt": "Planejando",
+    "interrupt": false,
+    "prompt_en": "medieval adventurers gathered around a candlelit table with a parchment map, weapons leaning against the wall"
+  },
+  {
+    "id": "B07",
+    "deck": "B",
+    "numero": 7,
+    "tipo": "Evento",
+    "texto_en": "Parting Ways",
+    "texto_pt": "Separação",
+    "interrupt": true,
+    "prompt_en": "one medieval kid looking back and the other looking forward, walking in opposite directions"
+  },
+  {
+    "id": "B08",
+    "deck": "B",
+    "numero": 8,
+    "tipo": "Evento",
+    "texto_en": "This is Revealed",
+    "texto_pt": "Algo é Revelado",
+    "interrupt": true,
+    "prompt_en": "a medieval lady reading a book and looking up in shock as a hidden secret is revealed, big magical light pouring from the pages"
+  },
+  {
+    "id": "B09",
+    "deck": "B",
+    "numero": 9,
+    "tipo": "Coisa",
+    "texto_en": "Axe",
+    "texto_pt": "Machado",
+    "interrupt": false,
+    "prompt_en": "a sharp axe embedded in a mossy stump in a forest clearing, ancient runes carved on the handle"
+  },
+  {
+    "id": "B10",
+    "deck": "B",
+    "numero": 10,
+    "tipo": "Coisa",
+    "texto_en": "Clothes",
+    "texto_pt": "Roupas",
+    "interrupt": false,
+    "prompt_en": "a shimmering medieval ball gown and royal tunic on wooden forms in a candlelit chamber, pearl embroidery gleaming"
+  },
+  {
+    "id": "B11",
+    "deck": "B",
+    "numero": 11,
+    "tipo": "Coisa",
+    "texto_en": "Door",
+    "texto_pt": "Porta",
+    "interrupt": false,
+    "prompt_en": "a massive wooden door carved with serpents in a moss-covered stone archway, golden light glowing beneath"
+  },
+  {
+    "id": "B12",
+    "deck": "B",
+    "numero": 12,
+    "tipo": "Coisa",
+    "texto_en": "Stairs",
+    "texto_pt": "Escada",
+    "interrupt": false,
+    "prompt_en": "a worn stone spiral staircase winding into darkness in a tower, torches at each landing, a glow at the top"
+  },
+  {
+    "id": "B13",
+    "deck": "B",
+    "numero": 13,
+    "tipo": "Coisa",
+    "texto_en": "Tree",
+    "texto_pt": "Árvore",
+    "interrupt": false,
+    "prompt_en": "an ancient giant tree with glowing golden leaves, fairy lights and fireflies drifting among its vast boughs"
+  },
+  {
+    "id": "B14",
+    "deck": "B",
+    "numero": 14,
+    "tipo": "Coisa",
+    "texto_en": "Wall",
+    "texto_pt": "Muro",
+    "interrupt": false,
+    "prompt_en": "a great wall dividing a kingdom seen from bellow"
+  },
+  {
+    "id": "B15",
+    "deck": "B",
+    "numero": 15,
+    "tipo": "Coisa",
+    "texto_en": "Window",
+    "texto_pt": "Janela",
+    "interrupt": false,
+    "prompt_en": "a tall arched castle window with moonlight streaming through, a candle on the sill, the dark courtyard below"
+  },
+  {
+    "id": "B16",
+    "deck": "B",
+    "numero": 16,
+    "tipo": "Aspecto",
+    "texto_en": "Foolish",
+    "texto_pt": "Tolo(a)",
+    "interrupt": false,
+    "prompt_en": "a court jester tripping over his curly shoes before the king's throne, juggled apples flying, hat askew"
+  },
+  {
+    "id": "B17",
+    "deck": "B",
+    "numero": 17,
+    "tipo": "Aspecto",
+    "texto_en": "Frightened",
+    "texto_pt": "Amedrontado(a)",
+    "interrupt": false,
+    "prompt_en": "a terrified peasant pressed into a dark corner afraid of a monster in the dark"
+  },
+  {
+    "id": "B18",
+    "deck": "B",
+    "numero": 18,
+    "tipo": "Aspecto",
+    "texto_en": "Happy",
+    "texto_pt": "Feliz",
+    "interrupt": false,
+    "prompt_en": "joyful medieval revelers dancing in a village square, musicians on a stage, ribbons on a maypole, lanterns above"
+  },
+  {
+    "id": "B19",
+    "deck": "B",
+    "numero": 19,
+    "tipo": "Aspecto",
+    "texto_en": "Lucky",
+    "texto_pt": "Sortudo(a)",
+    "interrupt": false,
+    "prompt_en": "a wide-eyed peasant finding a glowing four-leaf clover in a meadow, gold coins raining from the sky"
+  },
+  {
+    "id": "B20",
+    "deck": "B",
+    "numero": 20,
+    "tipo": "Aspecto",
+    "texto_en": "Sad",
+    "texto_pt": "Triste",
+    "interrupt": false,
+    "prompt_en": "a lone figure hunched beside a rainy arched window, tears on their cheeks, a wilted flower on the sill"
+  },
+  {
+    "id": "B21",
+    "deck": "B",
+    "numero": 21,
+    "tipo": "Aspecto",
+    "texto_en": "Ugly",
+    "texto_pt": "Feio(a)",
+    "interrupt": false,
+    "prompt_en": "a warty troll lurking under a mossy stone bridge, yellow eyes peering up, murky water below"
+  },
+  {
+    "id": "B22",
+    "deck": "B",
+    "numero": 22,
+    "tipo": "Aspecto",
+    "texto_en": "Very Strong",
+    "texto_pt": "Muito Forte",
+    "interrupt": false,
+    "prompt_en": "a mighty warrior hoisting a massive boulder overhead, a crowd backing away in disbelief, stone dust falling"
+  },
+  {
+    "id": "B23",
+    "deck": "B",
+    "numero": 23,
+    "tipo": "Aspecto",
+    "texto_en": "Blind",
+    "texto_pt": "Cego(a)",
+    "interrupt": true,
+    "prompt_en": "a man with a blindfold over his eyes"
+  },
+  {
+    "id": "B24",
+    "deck": "B",
+    "numero": 24,
+    "tipo": "Aspecto",
+    "texto_en": "Crazy",
+    "texto_pt": "Louco(a)",
+    "interrupt": true,
+    "prompt_en": "crazyness like alice in wonderland"
+  },
+  {
+    "id": "B25",
+    "deck": "B",
+    "numero": 25,
+    "tipo": "Lugar",
+    "texto_en": "Cottage",
+    "texto_pt": "Cabana",
+    "interrupt": false,
+    "prompt_en": "a thatched cottage in a forest clearing, warm light in every window, smoke from the chimney, a herb garden"
+  },
+  {
+    "id": "B26",
+    "deck": "B",
+    "numero": 26,
+    "tipo": "Lugar",
+    "texto_en": "Forest",
+    "texto_pt": "Floresta",
+    "interrupt": false,
+    "prompt_en": "a deep enchanted forest with gnarled trees, silver-blue light through the canopy, glowing mushrooms and mist"
+  },
+  {
+    "id": "B27",
+    "deck": "B",
+    "numero": 27,
+    "tipo": "Lugar",
+    "texto_en": "Kitchen",
+    "texto_pt": "Cozinha",
+    "interrupt": false,
+    "prompt_en": "a warm castle kitchen with a stone fireplace, copper pots on hooks, dried herbs from the ceiling, a cat on the hearth"
+  },
+  {
+    "id": "B28",
+    "deck": "B",
+    "numero": 28,
+    "tipo": "Lugar",
+    "texto_en": "River",
+    "texto_pt": "Rio",
+    "interrupt": false,
+    "prompt_en": "a sparkling river through an enchanted valley, weeping willows"
+  },
+  {
+    "id": "B29",
+    "deck": "B",
+    "numero": 29,
+    "tipo": "Lugar",
+    "texto_en": "Village",
+    "texto_pt": "Vila",
+    "interrupt": false,
+    "prompt_en": "a medieval village with thatched half-timbered houses on a cobbled lane, a well, a forge glowing, chimneys"
+  },
+  {
+    "id": "B30",
+    "deck": "B",
+    "numero": 30,
+    "tipo": "Lugar",
+    "texto_en": "Home",
+    "texto_pt": "Lar",
+    "interrupt": true,
+    "prompt_en": "a warm medieval home at evening, a family by a crackling fireplace, stew over the fire, candles on the table"
+  },
+  {
+    "id": "B31",
+    "deck": "B",
+    "numero": 31,
+    "tipo": "Personagem",
+    "texto_en": "Beggar",
+    "texto_pt": "Mendigo",
+    "interrupt": false,
+    "prompt_en": "a gaunt beggar in ragged robes against a stone wall in a medieval street, a wooden bowl and staff beside"
+  },
+  {
+    "id": "B32",
+    "deck": "B",
+    "numero": 32,
+    "tipo": "Personagem",
+    "texto_en": "Brother or Sister",
+    "texto_pt": "Irmão ou Irmã",
+    "interrupt": false,
+    "prompt_en": "a brother and sister kids in peasant tunics walking hand in hand through a sun-dappled forest"
+  },
+  {
+    "id": "B33",
+    "deck": "B",
+    "numero": 33,
+    "tipo": "Personagem",
+    "texto_en": "Child",
+    "texto_pt": "Criança",
+    "interrupt": false,
+    "prompt_en": "a curious child in a meadow crouching to look at a flower"
+  },
+  {
+    "id": "B34",
+    "deck": "B",
+    "numero": 34,
+    "tipo": "Personagem",
+    "texto_en": "Stepmother",
+    "texto_pt": "Madrasta",
+    "interrupt": false,
+    "prompt_en": "a wicked woman looking at a child with disdain"
+  },
+  {
+    "id": "B35",
+    "deck": "B",
+    "numero": 35,
+    "tipo": "Personagem",
+    "texto_en": "Parent",
+    "texto_pt": "Pai ou Mãe",
+    "interrupt": false,
+    "prompt_en": "a loving parent kneeling to embrace their child in a sunlit cottage doorway, the child's arms around their neck"
+  },
+  {
+    "id": "B36",
+    "deck": "B",
+    "numero": 36,
+    "tipo": "Personagem",
+    "texto_en": "Husband or Wife",
+    "texto_pt": "Marido ou Esposa",
+    "interrupt": true,
+    "prompt_en": "a medieval couple side by side in their cottage doorway, arm in arm, smiling with quiet contentment"
+  },
+  {
+    "id": "B37",
+    "deck": "B",
+    "numero": 37,
+    "tipo": "Personagem",
+    "texto_en": "Old Person",
+    "texto_pt": "Pessoa Idosa",
+    "interrupt": true,
+    "prompt_en": "a dignified elder in a robe leaning on a gnarled staff at a forest path, watching the horizon"
+  },
+  {
+    "id": "B38",
+    "deck": "B",
+    "numero": 38,
+    "tipo": "Personagem",
+    "texto_en": "Orphan",
+    "texto_pt": "Órfão(ã)",
+    "interrupt": true,
+    "prompt_en": "a small orphan in tattered rags on a wet cobblestone street at night, clutching a cloth doll, gazing at a lit window"
+  },
+  {
+    "id": "C01",
+    "deck": "C",
+    "numero": 1,
+    "tipo": "Evento",
+    "texto_en": "Lost",
+    "texto_pt": "Perdido",
+    "interrupt": false,
+    "prompt_en": "a traveler in front of a bifurcation path"
+  },
+  {
+    "id": "C02",
+    "deck": "C",
+    "numero": 2,
+    "tipo": "Evento",
+    "texto_en": "Found",
+    "texto_pt": "Encontrado",
+    "interrupt": false,
+    "prompt_en": "an explorer in a crystal-lit cave with a glittering treasure"
+  },
+  {
+    "id": "C03",
+    "deck": "C",
+    "numero": 3,
+    "tipo": "Evento",
+    "texto_en": "Journey",
+    "texto_pt": "Jornada",
+    "interrupt": false,
+    "prompt_en": "a lone traveler in a weathered cloak on a winding road through mountains, forests, and enchanted valleys"
+  },
+  {
+    "id": "C04",
+    "deck": "C",
+    "numero": 4,
+    "tipo": "Evento",
+    "texto_en": "This Comes Alive",
+    "texto_pt": "Algo Ganha Vida",
+    "interrupt": false,
+    "prompt_en": "wooden puppet with in a workshop"
+  },
+  {
+    "id": "C05",
+    "deck": "C",
+    "numero": 5,
+    "tipo": "Evento",
+    "texto_en": "Storm",
+    "texto_pt": "Tempestade",
+    "interrupt": false,
+    "prompt_en": "a storm with a lot of lightning over the sea at night with dark clouds"
+  },
+  {
+    "id": "C06",
+    "deck": "C",
+    "numero": 6,
+    "tipo": "Evento",
+    "texto_en": "Time Passes",
+    "texto_pt": "O Tempo Passa",
+    "interrupt": false,
+    "prompt_en": "a magical hourglass with glowing sand, one half showing spring, the other winter, seasons changing through a window"
+  },
+  {
+    "id": "C07",
+    "deck": "C",
+    "numero": 7,
+    "tipo": "Evento",
+    "texto_en": "Transforming",
+    "texto_pt": "Transformação",
+    "interrupt": false,
+    "prompt_en": "a crysalis becoming a butterfly"
+  },
+  {
+    "id": "C08",
+    "deck": "C",
+    "numero": 8,
+    "tipo": "Evento",
+    "texto_en": "Dying",
+    "texto_pt": "Morte",
+    "interrupt": true,
+    "prompt_en": "death skeleton with a scythe"
+  },
+  {
+    "id": "C09",
+    "deck": "C",
+    "numero": 9,
+    "tipo": "Evento",
+    "texto_en": "Returned",
+    "texto_pt": "Retorno",
+    "interrupt": true,
+    "prompt_en": "a travel-worn figure in a cottage doorway, arms spread, a family rushing toward them in joyful disbelief"
+  },
+  {
+    "id": "C10",
+    "deck": "C",
+    "numero": 10,
+    "tipo": "Coisa",
+    "texto_en": "Book",
+    "texto_pt": "Livro",
+    "interrupt": false,
+    "prompt_en": "an ancient book on a table"
+  },
+  {
+    "id": "C11",
+    "deck": "C",
+    "numero": 11,
+    "tipo": "Coisa",
+    "texto_en": "Cauldron",
+    "texto_pt": "Caldeirão",
+    "interrupt": false,
+    "prompt_en": "an iron cauldron bubbling with green and violet vapors, strange ingredients on shelves, eerie light on stone walls"
+  },
+  {
+    "id": "C12",
+    "deck": "C",
+    "numero": 12,
+    "tipo": "Coisa",
+    "texto_en": "Fire",
+    "texto_pt": "Fogo",
+    "interrupt": false,
+    "prompt_en": "a magical campfire with gold and blue flames in a forest clearing, sparks rising, figures huddled around it"
+  },
+  {
+    "id": "C13",
+    "deck": "C",
+    "numero": 13,
+    "tipo": "Coisa",
+    "texto_en": "Spell",
+    "texto_pt": "Feitiço",
+    "interrupt": false,
+    "prompt_en": "a robed sorcerer casting a spell, spiraling ribbons of blue and gold energy from their fingertips"
+  },
+  {
+    "id": "C14",
+    "deck": "C",
+    "numero": 14,
+    "tipo": "Coisa",
+    "texto_en": "A Well",
+    "texto_pt": "Poço",
+    "interrupt": false,
+    "prompt_en": "a stone well in a village square, a floating bucket, coins below"
+  },
+  {
+    "id": "C15",
+    "deck": "C",
+    "numero": 15,
+    "tipo": "Coisa",
+    "texto_en": "Gift",
+    "texto_pt": "Presente",
+    "interrupt": true,
+    "prompt_en": "an ornate gift box on a stone floor, golden light pulsing from its seams, nearby objects trembling toward it"
+  },
+  {
+    "id": "C16",
+    "deck": "C",
+    "numero": 16,
+    "tipo": "Aspecto",
+    "texto_en": "Cursed",
+    "texto_pt": "Amaldiçoado(a)",
+    "interrupt": false,
+    "prompt_en": "a pentagram drawing on the ground with offerings and a purple smoke"
+  },
+  {
+    "id": "C17",
+    "deck": "C",
+    "numero": 17,
+    "tipo": "Aspecto",
+    "texto_en": "Poisoned",
+    "texto_pt": "Envenenado(a)",
+    "interrupt": false,
+    "prompt_en": "a red apple with sickly green vapor curling from it on a wooden table, a bite already taken"
+  },
+  {
+    "id": "C18",
+    "deck": "C",
+    "numero": 18,
+    "tipo": "Aspecto",
+    "texto_en": "This Can Fly",
+    "texto_pt": "Pode Voar",
+    "interrupt": false,
+    "prompt_en": "a magical flying aladin carpet soaring on the sky"
+  },
+  {
+    "id": "C19",
+    "deck": "C",
+    "numero": 19,
+    "tipo": "Aspecto",
+    "texto_en": "This Can Talk",
+    "texto_pt": "Pode Falar",
+    "interrupt": false,
+    "prompt_en": "gray gargoyle statue speaking with a mouth open and a woman surprised in front of it, a magical light between them"
+  },
+  {
+    "id": "C20",
+    "deck": "C",
+    "numero": 20,
+    "tipo": "Aspecto",
+    "texto_en": "Tiny",
+    "texto_pt": "Minúsculo(a)",
+    "interrupt": false,
+    "prompt_en": "a tiny girl next to a giant flower"
+  },
+  {
+    "id": "C21",
+    "deck": "C",
+    "numero": 21,
+    "tipo": "Aspecto",
+    "texto_en": "Wicked",
+    "texto_pt": "Perverso(a)",
+    "interrupt": false,
+    "prompt_en": "a sinister demon looming over a crystal ball, fingers steepled, shadows writhing around them"
+  },
+  {
+    "id": "C22",
+    "deck": "C",
+    "numero": 22,
+    "tipo": "Aspecto",
+    "texto_en": "Far Away",
+    "texto_pt": "Muito Distante",
+    "interrupt": true,
+    "prompt_en": "a lone traveler on a hilltop gazing at a distant magical kingdom, forests and rivers between them"
+  },
+  {
+    "id": "C23",
+    "deck": "C",
+    "numero": 23,
+    "tipo": "Aspecto",
+    "texto_en": "Long-lost",
+    "texto_pt": "Há Muito Perdido(a)",
+    "interrupt": true,
+    "prompt_en": "a statue swallowed by sand in the desert, only a hand above the sand"
+  },
+  {
+    "id": "C24",
+    "deck": "C",
+    "numero": 24,
+    "tipo": "Lugar",
+    "texto_en": "Cave",
+    "texto_pt": "Caverna",
+    "interrupt": false,
+    "prompt_en": "a deep cave in a cliff face, stalactites at the entrance, glowing crystals lighting the interior in blue and violet"
+  },
+  {
+    "id": "C25",
+    "deck": "C",
+    "numero": 25,
+    "tipo": "Lugar",
+    "texto_en": "In the Sky",
+    "texto_pt": "No Céu",
+    "interrupt": false,
+    "prompt_en": "sky full of clouds and birds, only sky in the image, no ground in sight"
+  },
+  {
+    "id": "C26",
+    "deck": "C",
+    "numero": 26,
+    "tipo": "Lugar",
+    "texto_en": "Mountain",
+    "texto_pt": "Montanha",
+    "interrupt": false,
+    "prompt_en": "a snow-capped mountain rising into a violet sky"
+  },
+  {
+    "id": "C27",
+    "deck": "C",
+    "numero": 27,
+    "tipo": "Lugar",
+    "texto_en": "Night",
+    "texto_pt": "Noite",
+    "interrupt": false,
+    "prompt_en": "a dark night sky no ground in sight"
+  },
+  {
+    "id": "C28",
+    "deck": "C",
+    "numero": 28,
+    "tipo": "Lugar",
+    "texto_en": "Swamp",
+    "texto_pt": "Pântano",
+    "interrupt": false,
+    "prompt_en": "a fog-shrouded swamp at twilight, twisted dead trees in black water, will-o-wisps hovering, a half-sunken boat"
+  },
+  {
+    "id": "C29",
+    "deck": "C",
+    "numero": 29,
+    "tipo": "Lugar",
+    "texto_en": "Kingdom",
+    "texto_pt": "Reino",
+    "interrupt": true,
+    "prompt_en": "a vast fairy tale kingdom with a palace at its center, walled city, farmland, forests, mountains on the horizon"
+  },
+  {
+    "id": "C30",
+    "deck": "C",
+    "numero": 30,
+    "tipo": "Lugar",
+    "texto_en": "Ruin",
+    "texto_pt": "Ruínas",
+    "interrupt": true,
+    "prompt_en": "ancient ruins with broken bricks, dirt, burnt, destroyed, crumbling walls"
+  },
+  {
+    "id": "C31",
+    "deck": "C",
+    "numero": 31,
+    "tipo": "Personagem",
+    "texto_en": "Fairy",
+    "texto_pt": "Fada",
+    "interrupt": false,
+    "prompt_en": "a tiny fairy with iridescent wings hovering in a moonlit clearing, trailing silver stardust, cradling a glowing orb"
+  },
+  {
+    "id": "C32",
+    "deck": "C",
+    "numero": 32,
+    "tipo": "Personagem",
+    "texto_en": "Giant",
+    "texto_pt": "Gigante",
+    "interrupt": false,
+    "prompt_en": "a giant man walking nearby mountains"
+  },
+  {
+    "id": "C33",
+    "deck": "C",
+    "numero": 33,
+    "tipo": "Personagem",
+    "texto_en": "Wolf",
+    "texto_pt": "Lobo",
+    "interrupt": false,
+    "prompt_en": "a silver wolf with glowing yellow eyes in an enchanted forest, exhaling white mist, the full moon through branches"
+  },
+  {
+    "id": "C34",
+    "deck": "C",
+    "numero": 34,
+    "tipo": "Personagem",
+    "texto_en": "Frog",
+    "texto_pt": "Sapo",
+    "interrupt": false,
+    "prompt_en": "a regal frog with a tiny golden crown on a lily pad in an enchanted pond, wise eyes, magical droplets around"
+  },
+  {
+    "id": "C35",
+    "deck": "C",
+    "numero": 35,
+    "tipo": "Personagem",
+    "texto_en": "Horse",
+    "texto_pt": "Cavalo",
+    "interrupt": false,
+    "prompt_en": "a white horse rearing in a sun-drenched magical meadow, mane flowing, wildflowers scattering beneath its hooves"
+  },
+  {
+    "id": "C36",
+    "deck": "C",
+    "numero": 36,
+    "tipo": "Personagem",
+    "texto_en": "Monster",
+    "texto_pt": "Monstro",
+    "interrupt": false,
+    "prompt_en": "monster"
+  },
+  {
+    "id": "C37",
+    "deck": "C",
+    "numero": 37,
+    "tipo": "Personagem",
+    "texto_en": "Dragon",
+    "texto_pt": "Dragão",
+    "interrupt": false,
+    "prompt_en": "an ancient dragon perched on a mountain peak, wings spread against a stormy sky, golden fire from its jaws"
+  },
+  {
+    "id": "C38",
+    "deck": "C",
+    "numero": 38,
+    "tipo": "Personagem",
+    "texto_en": "Witch",
+    "texto_pt": "Bruxa",
+    "interrupt": false,
+    "prompt_en": "a wicked witch before her bubbling cauldron in a candlelit cottage, clutching a broomstick, a black cat on the sill"
+  },
+  {
+    "id": "A39",
+    "deck": "A",
+    "numero": 39,
+    "tipo": "Final",
+    "texto_en": "And for all I know they may be dancing in the palace still.",
+    "texto_pt": "E pelo que eu sei, eles ainda podem estar dançando no palácio.",
+    "interrupt": false,
+    "prompt_en": "elegantly dressed medieval couples twirling joyfully across a magnificent golden palace ballroom lit by a thousand candles, the music seemingly endless, laughter filling the vaulted halls, flowers cascading from the balconies above"
+  },
+  {
+    "id": "A40",
+    "deck": "A",
+    "numero": 40,
+    "tipo": "Final",
+    "texto_en": "And the kingdom rejoiced at the end of the tyrant's reign.",
+    "texto_pt": "E o reino se alegrou com o fim do reinado do tirano.",
+    "interrupt": false,
+    "prompt_en": "jubilant crowds flooding a medieval city square in celebration, colorful banners unfurling from castle walls, flower petals raining down from every window, church bells ringing across rooftops, the broken crown of the tyrant lying discarded in the street"
+  },
+  {
+    "id": "A41",
+    "deck": "A",
+    "numero": 41,
+    "tipo": "Final",
+    "texto_en": "Despite his terrible crime, the king agreed to spare his life.",
+    "texto_pt": "Apesar de seu terrível crime, o rei concordou em poupar sua vida.",
+    "interrupt": false,
+    "prompt_en": "a powerful king descending from his golden throne to place a hand on the shoulder of a kneeling chained prisoner, lifting them to their feet with merciful eyes, guards and court watching in stunned silence in the torch-lit hall"
+  },
+  {
+    "id": "A42",
+    "deck": "A",
+    "numero": 42,
+    "tipo": "Final",
+    "texto_en": "Her courage had made her rich.",
+    "texto_pt": "Sua coragem a tornou rica.",
+    "interrupt": false,
+    "prompt_en": "a determined young woman in travel-worn clothes standing triumphantly at the center of an overflowing treasure vault, sword raised, golden light bathing her face, the rewards of her dangerous quest spread around her feet"
+  },
+  {
+    "id": "A43",
+    "deck": "A",
+    "numero": 43,
+    "tipo": "Final",
+    "texto_en": "But no matter how hard they searched they were never able to find it again.",
+    "texto_pt": "Mas por mais que procurassem, nunca mais conseguiram encontrá-lo.",
+    "interrupt": false,
+    "prompt_en": "a group of weary medieval travelers searching through a vast featureless misty moorland, looking desperately in all directions with lanterns raised, the object of their quest nowhere to be found, the land offering no answers"
+  },
+  {
+    "id": "A44",
+    "deck": "A",
+    "numero": 44,
+    "tipo": "Final",
+    "texto_en": "And they remained blind for the rest of their days for their wickedness and falsehood.",
+    "texto_pt": "E permaneceram cegos pelo resto de seus dias por sua maldade e falsidade.",
+    "interrupt": false,
+    "prompt_en": "two once-wealthy figures in tattered rich robes stumbling blindly through a dark corridor, hands outstretched and groping, unable to see the light at the end of the hall, their deception written in the darkness surrounding them"
+  },
+  {
+    "id": "A45",
+    "deck": "A",
+    "numero": 45,
+    "tipo": "Final",
+    "texto_en": "And when they died they passed it on to their children.",
+    "texto_pt": "E quando morreram, passaram-no para seus filhos.",
+    "interrupt": false,
+    "prompt_en": "elderly parents in a warmly lit cottage solemnly placing a glowing golden heirloom into the hands of their grown children, a moment of tender ceremony, the legacy of generations passing from one set of hands to another"
+  },
+  {
+    "id": "A46",
+    "deck": "A",
+    "numero": 46,
+    "tipo": "Final",
+    "texto_en": "So he told her he was the prince and they lived happily ever after.",
+    "texto_pt": "Então ele lhe disse que era o príncipe e viveram felizes para sempre.",
+    "interrupt": false,
+    "prompt_en": "a young man removing a traveling cloak to reveal gleaming royal armor beneath, kneeling before a surprised and delighted young woman in a moonlit garden, a golden crown extended toward her in both hands"
+  },
+  {
+    "id": "A47",
+    "deck": "A",
+    "numero": 47,
+    "tipo": "Final",
+    "texto_en": "So the cook prepared it for the feast and it was delicious.",
+    "texto_pt": "Então o cozinheiro o preparou para o banquete e ficou delicioso.",
+    "interrupt": false,
+    "prompt_en": "a proud rotund cook presenting a magnificent steaming golden roasted dish at the head of a long feast table crowded with hungry nobles, the cook beaming with pride, candlelight reflecting off platters heaped with medieval fare"
+  },
+  {
+    "id": "A48",
+    "deck": "A",
+    "numero": 48,
+    "tipo": "Final",
+    "texto_en": "So the king relented and the two were married.",
+    "texto_pt": "Então o rei cedeu e os dois se casaram.",
+    "interrupt": false,
+    "prompt_en": "a radiant couple joining hands before a flower-draped altar in a soaring gothic cathedral, rose petals falling from the vaulted ceiling, the congregation rising to its feet to applaud, stained glass light streaming down in every color"
+  },
+  {
+    "id": "A49",
+    "deck": "A",
+    "numero": 49,
+    "tipo": "Final",
+    "texto_en": "So the queen gave them the prize as she had promised.",
+    "texto_pt": "Então a rainha lhes deu o prêmio como havia prometido.",
+    "interrupt": false,
+    "prompt_en": "a stately queen descending from her dais with an ornate golden trophy, presenting it graciously to two kneeling heroes as the assembled court watches with admiration and applause, the queen's expression one of regal satisfaction at her kept promise"
+  },
+  {
+    "id": "A50",
+    "deck": "A",
+    "numero": 50,
+    "tipo": "Final",
+    "texto_en": "So the rightful ruler was placed on the throne once more.",
+    "texto_pt": "Então o governante legítimo foi colocado no trono mais uma vez.",
+    "interrupt": false,
+    "prompt_en": "a solemn archbishop lowering a heavy jeweled crown onto the bowed head of a young ruler seated on a grand marble throne, the entire court kneeling in acknowledgment, sunlight from tall windows illuminating the moment"
+  },
+  {
+    "id": "A51",
+    "deck": "A",
+    "numero": 51,
+    "tipo": "Final",
+    "texto_en": "So they escaped their captors and fled home.",
+    "texto_pt": "Então escaparam de seus captores e fugiram para casa.",
+    "interrupt": false,
+    "prompt_en": "two ragged but overjoyed prisoners bursting through a fortress gate into blinding sunlight, broken chains dangling from their wrists, the dark castle looming behind them as they sprint toward a green valley and a distant cottage"
+  },
+  {
+    "id": "A52",
+    "deck": "A",
+    "numero": 52,
+    "tipo": "Final",
+    "texto_en": "So they returned what was stolen to its original owner.",
+    "texto_pt": "Então devolveram o que foi roubado ao seu dono original.",
+    "interrupt": false,
+    "prompt_en": "a reformed figure kneeling in a sunlit courtyard, presenting a golden crown on outstretched hands to its tearful rightful owner, a crowd of onlookers cheering, justice and redemption palpable in the scene"
+  },
+  {
+    "id": "A53",
+    "deck": "A",
+    "numero": 53,
+    "tipo": "Final",
+    "texto_en": "The king fulfilled his side of the bargain and everyone was happy.",
+    "texto_pt": "O rei cumpriu sua parte no acordo e todos ficaram felizes.",
+    "interrupt": false,
+    "prompt_en": "a beaming king clasping the hand of a humble villager before his full court, servants carrying a chest of gold behind them, smiles on every face in the throne room as the promise made long ago is finally kept"
+  },
+  {
+    "id": "A54",
+    "deck": "A",
+    "numero": 54,
+    "tipo": "Final",
+    "texto_en": "The prince's madness was cured.",
+    "texto_pt": "A loucura do príncipe foi curada.",
+    "interrupt": false,
+    "prompt_en": "a disheveled prince kneeling with eyes closed in a palace courtyard as soft golden healing light descends on him, his wild tormented expression melting into calm peace, dark wisps of madness dissolving into the clear air, his court watching in tearful relief"
+  },
+  {
+    "id": "A55",
+    "deck": "A",
+    "numero": 55,
+    "tipo": "Final",
+    "texto_en": "Which meant they would become king and queen in the course of time.",
+    "texto_pt": "O que significava que se tornariam rei e rainha com o passar do tempo.",
+    "interrupt": false,
+    "prompt_en": "a young couple in simple but noble clothes standing hand in hand on a hillside at golden sunset, gazing toward a magnificent castle on the horizon knowing it will one day be theirs, hope and destiny shining in their faces"
+  },
+  {
+    "id": "B39",
+    "deck": "B",
+    "numero": 39,
+    "tipo": "Final",
+    "texto_en": "And his mother was delighted with such an unusual gift.",
+    "texto_pt": "E sua mãe ficou encantada com um presente tão incomum.",
+    "interrupt": false,
+    "prompt_en": "a mother's face lighting up in astonished delight as her young child presents an impossibly extraordinary magical creature or glowing object in a humble medieval cottage, the child grinning proudly"
+  },
+  {
+    "id": "B40",
+    "deck": "B",
+    "numero": 40,
+    "tipo": "Final",
+    "texto_en": "And she kept her father's advice in mind from that day onwards.",
+    "texto_pt": "E ela manteve o conselho de seu pai em mente daquele dia em diante.",
+    "interrupt": false,
+    "prompt_en": "a young woman pausing thoughtfully at a forest crossroads, closing her eyes as a gentle translucent vision of her wise elderly father's face appears beside her in warm golden light, his counsel guiding her choice"
+  },
+  {
+    "id": "B41",
+    "deck": "B",
+    "numero": 41,
+    "tipo": "Final",
+    "texto_en": "And so the old woman's prophecy had been fulfilled.",
+    "texto_pt": "E assim a profecia da velha senhora se cumpriu.",
+    "interrupt": false,
+    "prompt_en": "an ancient crone seated by a crackling fireplace smiling with deep satisfaction, while through the window behind her the exact scene she once foretold plays out in glowing magical light, her prophecy realized to the letter"
+  },
+  {
+    "id": "B42",
+    "deck": "B",
+    "numero": 42,
+    "tipo": "Final",
+    "texto_en": "And the parents were reunited with their long-lost child.",
+    "texto_pt": "E os pais foram reunidos com seu filho há muito perdido.",
+    "interrupt": false,
+    "prompt_en": "parents falling to their knees in a sunlit meadow to embrace a weeping child who has returned after years apart, arms wrapped tightly around each other, wildflowers scattering around them, the ache of long separation dissolving into pure joy"
+  },
+  {
+    "id": "B43",
+    "deck": "B",
+    "numero": 43,
+    "tipo": "Final",
+    "texto_en": "She escaped that awful place and fled home.",
+    "texto_pt": "Ela escapou daquele lugar terrível e fugiu para casa.",
+    "interrupt": false,
+    "prompt_en": "a barefoot girl in torn clothes sprinting down a moonlit forest path, hair streaming behind her, the dark silhouette of a forbidding fortress receding behind her, a warm candlelit cottage glowing at the edge of the trees ahead"
+  },
+  {
+    "id": "B44",
+    "deck": "B",
+    "numero": 44,
+    "tipo": "Final",
+    "texto_en": "Every day he saw the result of his disobedience, and wept.",
+    "texto_pt": "Todos os dias ele via o resultado de sua desobediência e chorava.",
+    "interrupt": false,
+    "prompt_en": "a man on his knees pressing his hands to his face in grief, before a withered cursed landscape of dead trees and cracked earth stretching to the horizon — a ruin entirely of his own making, tears falling onto the barren ground"
+  },
+  {
+    "id": "B45",
+    "deck": "B",
+    "numero": 45,
+    "tipo": "Final",
+    "texto_en": "He was freed from his enchantment and the next day they were married.",
+    "texto_pt": "Ele foi libertado de seu encantamento e no dia seguinte se casaram.",
+    "interrupt": false,
+    "prompt_en": "a man throwing his arms wide as dark magical vines and chains explode off his body in a burst of golden light, his tormented expression transforming into pure joy, the woman who freed him reaching toward him as the enchantment dissolves"
+  },
+  {
+    "id": "B46",
+    "deck": "B",
+    "numero": 46,
+    "tipo": "Final",
+    "texto_en": "He lived the rest of his life as a beggar — which was perfectly just.",
+    "texto_pt": "Ele viveu o resto de sua vida como mendigo — o que era perfeitamente justo.",
+    "interrupt": false,
+    "prompt_en": "a haggard old man in tattered robes slumped in a cold village alley, a faded crown emblem still barely visible on his ragged sleeve hinting at his former power, passersby ignoring him entirely — justice quietly, completely served"
+  },
+  {
+    "id": "B47",
+    "deck": "B",
+    "numero": 47,
+    "tipo": "Final",
+    "texto_en": "His wound was healed but his heart remained broken forever.",
+    "texto_pt": "Sua ferida foi curada, mas seu coração permaneceu partido para sempre.",
+    "interrupt": false,
+    "prompt_en": "a warrior standing in golden sunlight with perfectly restored armor and no trace of injury, yet his eyes fixed on a small open locket in his palm with an expression of unbearable quiet sadness, the physical wound gone but the deeper one unchanged"
+  },
+  {
+    "id": "B48",
+    "deck": "B",
+    "numero": 48,
+    "tipo": "Final",
+    "texto_en": "It just shows that stepmothers aren't always what they seem.",
+    "texto_pt": "Isso só mostra que madrastas nem sempre são o que parecem.",
+    "interrupt": false,
+    "prompt_en": "a woman who appeared stern and cold in a dark dress gently opening a door to let warm light spill across two wary children, her hard expression dissolving unexpectedly into a soft genuine smile, the children's fear turning to surprised wonder"
+  },
+  {
+    "id": "B49",
+    "deck": "B",
+    "numero": 49,
+    "tipo": "Final",
+    "texto_en": "So he forgave her and they were married.",
+    "texto_pt": "Então ele a perdoou e se casaram.",
+    "interrupt": false,
+    "prompt_en": "a young man gently cupping a tearful young woman's face in his hands outside a flower-adorned village chapel, his expression full of forgiveness and love overcoming hurt, their friends crowned with flowers celebrating around them in the warm sun"
+  },
+  {
+    "id": "B50",
+    "deck": "B",
+    "numero": 50,
+    "tipo": "Final",
+    "texto_en": "So he realized how loyal his sister had been.",
+    "texto_pt": "Então ele percebeu o quão leal sua irmã havia sido.",
+    "interrupt": false,
+    "prompt_en": "a young man dropping his sword in astonishment as the full truth of his sister's years of quiet sacrifice becomes clear to him, reaching toward her with trembling arms and tears streaming down his face, her own expression one of patient love finally recognized"
+  },
+  {
+    "id": "B51",
+    "deck": "B",
+    "numero": 51,
+    "tipo": "Final",
+    "texto_en": "So the village was restored to prosperity.",
+    "texto_pt": "Então a vila foi restaurada à prosperidade.",
+    "interrupt": false,
+    "prompt_en": "a vibrant medieval village glowing with renewed life — freshly thatched rooftops, overflowing market stalls, children playing in clean streets, flowers in every window box, neighbors laughing, sunlight breaking through after a long period of darkness"
+  },
+  {
+    "id": "B52",
+    "deck": "B",
+    "numero": 52,
+    "tipo": "Final",
+    "texto_en": "So they changed places and everything was back to normal.",
+    "texto_pt": "Então trocaram de lugar e tudo voltou ao normal.",
+    "interrupt": false,
+    "prompt_en": "two people stepping simultaneously through twin shimmering magical doorways that exchange them — one from a palace into a cottage, one from a cottage into a palace — swirling golden energy fading as each lands exactly where they belong"
+  },
+  {
+    "id": "B53",
+    "deck": "B",
+    "numero": 53,
+    "tipo": "Final",
+    "texto_en": "So they promised never to fight again.",
+    "texto_pt": "Então prometeram nunca mais brigar.",
+    "interrupt": false,
+    "prompt_en": "two former rivals slowly lowering their weapons and clasping each other's forearms in a solemn oath of peace beneath a brilliant rainbow arching over a freshly silent battlefield, the last echoes of conflict fading"
+  },
+  {
+    "id": "B54",
+    "deck": "B",
+    "numero": 54,
+    "tipo": "Final",
+    "texto_en": "Which proves that a heart that is brave and true will always triumph in the end.",
+    "texto_pt": "O que prova que um coração corajoso e verdadeiro sempre triunfará no final.",
+    "interrupt": false,
+    "prompt_en": "a radiant golden heart suspended like a beacon in the sky above a darkened kingdom, its warm light driving back every shadow from every corner, roads and rivers below illuminated, hope restored to all who look upon it"
+  },
+  {
+    "id": "B55",
+    "deck": "B",
+    "numero": 55,
+    "tipo": "Final",
+    "texto_en": "Which proves you should always be careful when choosing your companions.",
+    "texto_pt": "O que prova que você deve sempre ter cuidado ao escolher seus companheiros.",
+    "interrupt": false,
+    "prompt_en": "a lone traveler at a foggy crossroads studying three very different figures who each offer to accompany them — one glowing with quiet honesty, one half-shadowed and shifty, one cloaked and unreadable — the choice between them everything"
+  },
+  {
+    "id": "C39",
+    "deck": "C",
+    "numero": 39,
+    "tipo": "Final",
+    "texto_en": "And as long as she lived it could never be removed.",
+    "texto_pt": "E enquanto ela vivesse, nunca poderia ser removido.",
+    "interrupt": false,
+    "prompt_en": "a woman in a medieval gown pulling desperately at an ornate glowing necklace fused permanently to her throat, her expression shifting between wonder and dismay, the magical clasp pulsing warmly against her skin, refusing every attempt to undo it"
+  },
+  {
+    "id": "C40",
+    "deck": "C",
+    "numero": 40,
+    "tipo": "Final",
+    "texto_en": "And so the witch perished in her own cauldron.",
+    "texto_pt": "E assim a bruxa pereceu em seu próprio caldeirão.",
+    "interrupt": false,
+    "prompt_en": "a smoking iron cauldron in a shattered stone cottage, the witch's pointed hat and tattered robes floating in the still-bubbling liquid, candles snuffed out, shelves of potions toppled, an uncanny silence where evil once filled the room"
+  },
+  {
+    "id": "C41",
+    "deck": "C",
+    "numero": 41,
+    "tipo": "Final",
+    "texto_en": "Beaten, the foul creature was driven out of the kingdom.",
+    "texto_pt": "Derrotada, a criatura vil foi expulsa do reino.",
+    "interrupt": false,
+    "prompt_en": "an ugly defeated creature fleeing at full speed down a dusty road lined with torch-bearing villagers shouting it away, the castle gates closing firmly behind it, the kingdom's banners flying triumphantly above"
+  },
+  {
+    "id": "C42",
+    "deck": "C",
+    "numero": 42,
+    "tipo": "Final",
+    "texto_en": "She never let her treasure out of her sight again.",
+    "texto_pt": "Ela nunca mais perdeu seu tesouro de vista.",
+    "interrupt": false,
+    "prompt_en": "a determined woman sleeping upright in a wooden chair with both arms wrapped tightly around a small iron-banded treasure chest, one eye half-open in vigilance even in slumber, never trusting the world enough to let it go again"
+  },
+  {
+    "id": "C43",
+    "deck": "C",
+    "numero": 43,
+    "tipo": "Final",
+    "texto_en": "He saw the error of his ways and lived a good life from that day forward.",
+    "texto_pt": "Ele viu o erro de seus caminhos e viveu uma boa vida daquele dia em diante.",
+    "interrupt": false,
+    "prompt_en": "a once-selfish nobleman rolling up his sleeves to help village peasants lay bricks on a new cottage wall in warm afternoon light, laughing freely alongside them, the complete transformation of his character visible in every gesture"
+  },
+  {
+    "id": "C44",
+    "deck": "C",
+    "numero": 44,
+    "tipo": "Final",
+    "texto_en": "So it was transformed back into human form.",
+    "texto_pt": "Então foi transformado de volta à forma humana.",
+    "interrupt": false,
+    "prompt_en": "a beast mid-transformation, dark fur dissolving into human skin as a cascade of golden sparks swirls upward, claws becoming hands, the creature's anguished features reshaping into a handsome human face filled with overwhelming relief"
+  },
+  {
+    "id": "C45",
+    "deck": "C",
+    "numero": 45,
+    "tipo": "Final",
+    "texto_en": "So she revealed her true identity and they were married.",
+    "texto_pt": "Então ela revelou sua verdadeira identidade e se casaram.",
+    "interrupt": false,
+    "prompt_en": "a woman in a simple peasant dress pulling back her hood to reveal a gleaming tiara and the radiant face of a princess, a stunned groom reaching toward her with trembling hands in a flower-strewn chapel, the assembled guests erupting in joy"
+  },
+  {
+    "id": "C46",
+    "deck": "C",
+    "numero": 46,
+    "tipo": "Final",
+    "texto_en": "So she knew that her visitor had been a monster all along.",
+    "texto_pt": "Então ela soube que seu visitante havia sido um monstro o tempo todo.",
+    "interrupt": false,
+    "prompt_en": "a woman holding a candle up to a cracked door, its shadow on the wall revealing the unmistakable silhouette of a horned monster where a friendly visitor had stood just moments before, her face frozen in a moment of terrible realization"
+  },
+  {
+    "id": "C47",
+    "deck": "C",
+    "numero": 47,
+    "tipo": "Final",
+    "texto_en": "So the evil-doers were thrown down a well.",
+    "texto_pt": "Então os malfeitores foram jogados em um poço.",
+    "interrupt": false,
+    "prompt_en": "two sneering villains in fine but torn robes tumbling backward over the rim of a deep stone well into darkness below, a circle of satisfied villagers watching their just punishment with solemn grim faces"
+  },
+  {
+    "id": "C48",
+    "deck": "C",
+    "numero": 48,
+    "tipo": "Final",
+    "texto_en": "So the spell was broken and they were free.",
+    "texto_pt": "Então o feitiço foi quebrado e eles ficaram livres.",
+    "interrupt": false,
+    "prompt_en": "dark binding chains and magical tendrils exploding into shards of light simultaneously around a group of enchanted people who gasp and look at each other in recognition for the first time in years, the oppressive magical darkness lifting from the room like a lifted veil"
+  },
+  {
+    "id": "C49",
+    "deck": "C",
+    "numero": 49,
+    "tipo": "Final",
+    "texto_en": "The curse was lifted as had been foretold.",
+    "texto_pt": "A maldição foi levantada como havia sido profetizado.",
+    "interrupt": false,
+    "prompt_en": "a black magical storm that has blanketed a castle and its lands for years suddenly parting as a column of brilliant golden light descends, dead vegetation greening instantaneously, villagers stepping into sunlight for the first time in memory, the prophecy fulfilled"
+  },
+  {
+    "id": "C50",
+    "deck": "C",
+    "numero": 50,
+    "tipo": "Final",
+    "texto_en": "The flames rose higher and the wicked place was destroyed.",
+    "texto_pt": "As chamas subiram mais alto e o lugar perverso foi destruído.",
+    "interrupt": false,
+    "prompt_en": "a forbidding black-stone fortress consumed by roaring supernatural flames of orange and crimson, its towers crumbling one by one as sparks shower into the night sky, the surrounding land already beginning to green and heal at the edges of the firelight"
+  },
+  {
+    "id": "C51",
+    "deck": "C",
+    "numero": 51,
+    "tipo": "Final",
+    "texto_en": "The monster was destroyed and the city was safe once more.",
+    "texto_pt": "O monstro foi destruído e a cidade ficou segura mais uma vez.",
+    "interrupt": false,
+    "prompt_en": "a colossal monster crashing to the cobblestones between stone buildings, cracking the street, as the hero stands over it sword raised in victory and citizens begin to peer cautiously and then joyfully from doorways and windows, relief flooding the city"
+  },
+  {
+    "id": "C52",
+    "deck": "C",
+    "numero": 52,
+    "tipo": "Final",
+    "texto_en": "They were buried in the same grave, and the kingdom mourned them.",
+    "texto_pt": "Foram enterrados na mesma sepultura, e o reino os pranteou.",
+    "interrupt": false,
+    "prompt_en": "a long procession of black-clad mourners winding through the streets of a medieval city, a flower-strewn bier at its heart, every window above lined with bowed heads, the entire kingdom united in grief for those it has lost"
+  },
+  {
+    "id": "C53",
+    "deck": "C",
+    "numero": 53,
+    "tipo": "Final",
+    "texto_en": "True love had broken the enchantment.",
+    "texto_pt": "O amor verdadeiro havia quebrado o encantamento.",
+    "interrupt": false,
+    "prompt_en": "a tender kiss between two figures dissolving a swirling dark enchantment into an eruption of cascading flowers and warm golden light, the world transforming around them from grey and cold to vivid and alive, the power of the spell shattered by something stronger"
+  },
+  {
+    "id": "C54",
+    "deck": "C",
+    "numero": 54,
+    "tipo": "Final",
+    "texto_en": "Which is how the kingdom got such an unusual name.",
+    "texto_pt": "E foi assim que o reino ganhou um nome tão incomum.",
+    "interrupt": false,
+    "prompt_en": "a weathered stone herald's plinth at a crossroads bearing a strangely carved coat of arms and an outlandish kingdom name, puzzled travelers examining it while a knowing local elder smiles and begins to tell the tale of how it came to be"
+  },
+  {
+    "id": "C55",
+    "deck": "C",
+    "numero": 55,
+    "tipo": "Final",
+    "texto_en": "With the enemy dead they could get married at last.",
+    "texto_pt": "Com o inimigo morto, puderam finalmente se casar.",
+    "interrupt": false,
+    "prompt_en": "a battle-worn couple exchanging vows on a sunlit hilltop, armor still dusty from recent hard-won combat, swords and shields set aside in the wildflowers at their feet, friends and allies cheering around them, finally free to love without fear"
+  }
+]
