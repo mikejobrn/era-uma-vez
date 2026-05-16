@@ -10,9 +10,9 @@ Este arquivo é a memória persistente dos agentes. Cada tarefa deve ser marcada
 - [x] 2. Criar projeto Next.js em `apps/game-client` e configurar PWA + Tailwind
 - [x] 3. Estabelecer pacotes (`shared-types`, `ui-fantasy`, `game-logic`) com aliases e dependências locais
 - [x] 4. Criar esquema SQL base para migrar `cartas.json` no Supabase (Tabela `cards`) — ver `supabase/migrations/`
-- [ ] 5. Criar Tabelas `rooms` e `players` no Supabase e testar conexões anônimas
-- [ ] 6. Criar Componente de "Mesa" (iPad) vazio com geração de QR Code e sala no DB
-- [ ] 7. Implementar tela de celular lendo o QR Code e inserindo jogador no Supabase
+- [x] 5. Criar Tabelas `rooms` e `players` no Supabase e testar conexões anônimas
+- [x] 6. Criar Componente de "Mesa" (iPad) vazio com geração de QR Code e sala no DB
+- [x] 7. Implementar tela de celular lendo o QR Code e inserindo jogador no Supabase
 
 ---
 
