@@ -1,0 +1,11 @@
+{
+  "name": "@era-uma-vez/card-tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scripts Python de geração e catalogação de cartas Era Uma Vez",
+  "scripts": {
+    "generate-images": "uv run python gerar_imagens.py",
+    "assemble-cards": "uv run python montar_cartas.py",
+    "generate-pdf": "uv run python gerar_pdf.py"
+  }
+}
