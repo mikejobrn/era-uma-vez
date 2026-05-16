@@ -45,7 +45,7 @@ export default function MesaPage() {
         .select("id, code, status, narrator_id, story_log")
         .single();
       if (error) {
-        setRoomError("Não foi possível criar a sala.");
+        setRoomError(formatRoomCreateError(error));
         return;
       }
       if (data) setRoom(data as RoomFull);
@@ -339,6 +339,17 @@ export default function MesaPage() {
       <PlayerCircle players={players} />
     </main>
   );
+}
+
+function formatRoomCreateError(error: { message?: string; code?: string; details?: string | null }) {
+  const message = error.message?.trim();
+  const code = error.code?.trim();
+  const details = error.details?.trim();
+
+  const suffix = [code, message, details].filter(Boolean).join(" | ");
+  const base =
+    "Não foi possível criar a sala. Verifique se as migrations do Supabase foram executadas (rooms/players/policies).";
+  return suffix ? `${base} (${suffix})` : base;
 }
 
 function PlayerCircle({ players }: { players: Player[] }) {
