@@ -63,25 +63,35 @@ def generate_pdf(cards_dir, output_pdf, cartas, page_w=A4[0], page_h=A4[1]):
     c.save()
     print(f"PDF salvo: {output_pdf}")
 
-def generate_back_pdf(back_img, num_cards, output_pdf):
+def generate_back_pdf(cartas, back_img_normal, back_img_final, output_pdf):
     c = canvas.Canvas(str(output_pdf), pagesize=A4)
     page_w, page_h = A4
     card_w = CARD_W_MM * mm
     card_h = CARD_H_MM * mm
     margin_x = (page_w - COLS * card_w) / 2
     margin_y = (page_h - ROWS * card_h) / 2
+    
+    num_cards = len(cartas)
     total_pages = (num_cards + CARDS_PER_PAGE - 1) // CARDS_PER_PAGE
 
     for page_idx in range(total_pages):
-        cards_on_page = min(CARDS_PER_PAGE, num_cards - page_idx * CARDS_PER_PAGE)
-        for i in range(cards_on_page):
+        start = page_idx * CARDS_PER_PAGE
+        end = min(start + CARDS_PER_PAGE, num_cards)
+        page_cards = cartas[start:end]
+        
+        for i, carta in enumerate(page_cards):
             col = (COLS - 1) - (i % COLS)  # Espelhado para frente-e-verso
             row = i // COLS
             x = margin_x + col * card_w
             y = page_h - margin_y - (row + 1) * card_h
-            if back_img.exists():
-                c.drawImage(str(back_img), x, y, card_w, card_h)
+            
+            tipo = carta.get("tipo", "")
+            img_path = back_img_final if tipo == "Final" else back_img_normal
+            
+            if img_path.exists():
+                c.drawImage(str(img_path), x, y, card_w, card_h)
             draw_cut_marks(c, x, y, card_w, card_h)
+            
         c.setFont("Helvetica", 8)
         c.drawString(10*mm, 5*mm, f"Era Uma Vez (Verso) - Pagina {page_idx+1}/{total_pages}")
         c.showPage()
@@ -91,7 +101,8 @@ def generate_back_pdf(back_img, num_cards, output_pdf):
 
 def main():
     cards_dir = Path("cartas_prontas")
-    back_img = Path("verso.png")
+    back_img_normal = Path("templates/verso.png")
+    back_img_final = Path("templates/verso_final.png")
 
     with open("cartas.json", "r", encoding="utf-8") as f:
         cartas = json.load(f)
@@ -99,11 +110,11 @@ def main():
     print(f"Gerando PDF frente ({len(cartas)} cartas)...")
     generate_pdf(cards_dir, Path("baralho_frente.pdf"), cartas)
 
-    if back_img.exists():
+    if back_img_normal.exists():
         print(f"Gerando PDF verso...")
-        generate_back_pdf(back_img, len(cartas), Path("baralho_verso.pdf"))
+        generate_back_pdf(cartas, back_img_normal, back_img_final, Path("baralho_verso.pdf"))
     else:
-        print("Aviso: verso.png nao encontrado, PDF de verso nao gerado.")
+        print("Aviso: templates/verso.png nao encontrado, PDF de verso nao gerado.")
 
     print("Concluido!")
 

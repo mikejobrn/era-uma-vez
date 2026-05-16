@@ -1,38 +1,35 @@
 """
 Monta as 165 cartas finais combinando template + ilustracao + texto.
-Tamanho: 825x1125px (Poker Size com bleed de 3mm, 300 DPI).
+Tamanho final: 825x1125px (Poker Size com bleed de 3mm, 300 DPI).
+Tamanho do template original: 768x1024px.
 """
 import json
+import sys
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import textwrap
 
+# Dimensoes do template original
+ORIG_W, ORIG_H = 768, 1024
+
 # Dimensoes (Poker Size 300 DPI + 3mm bleed)
 CARD_W, CARD_H = 825, 1125
-BLEED = 37  # ~3mm em pixels a 300 DPI
-SAFE = 37
-IMG_AREA_Y = 180
-IMG_AREA_H = 550
-IMG_AREA_X = BLEED + SAFE + 20
-IMG_AREA_W = CARD_W - 2 * (BLEED + SAFE + 20)
-
-# Cores por tipo
-COLORS = {
-    "Evento":     {"bg": "#8B1A1A", "accent": "#FF4444", "label": "#FFD700"},
-    "Coisa":      {"bg": "#8B7500", "accent": "#FFD700", "label": "#FFFACD"},
-    "Aspecto":    {"bg": "#4B0082", "accent": "#9370DB", "label": "#E6E6FA"},
-    "Lugar":      {"bg": "#006400", "accent": "#32CD32", "label": "#90EE90"},
-    "Personagem": {"bg": "#1B3A6B", "accent": "#4169E1", "label": "#B0C4DE"},
-    "Final":      {"bg": "#3B3B3B", "accent": "#FFD700", "label": "#FFFACD"},
-}
 
 TYPE_LABELS = {
     "Evento": "EVENTO", "Coisa": "OBJETO", "Aspecto": "ASPECTO",
     "Lugar": "LUGAR", "Personagem": "PERSONAGEM", "Final": "FINAL FELIZ",
 }
 
-def load_font(size):
-    font_path = Path("fontes/Cinzel-Variable.ttf")
+TYPE_COLORS = {
+    'Evento': {'circle': '#ff7c70', 'title': '#923c35', 'type': '#ff7c70', 'interrupt': '#923c35'},
+    'Coisa': {'circle': '#d5b040', 'title': '#7a4b00', 'type': '#d5b040', 'interrupt': '#7a4b00'},
+    'Aspecto': {'circle': '#94709d', 'title': '#4c1b58', 'type': '#94709d', 'interrupt': '#4c1b58'},
+    'Lugar': {'circle': '#8773ab', 'title': '#35215b', 'type': '#8773ab', 'interrupt': '#35215b'},
+    'Personagem': {'circle': '#c7bc70', 'title': '#283618', 'type': '#c7bc70', 'interrupt': '#283618'}
+}
+
+def load_font(font_name, size):
+    font_path = Path("fontes") / font_name
     if font_path.exists():
         return ImageFont.truetype(str(font_path), size)
     # Fallback
@@ -41,100 +38,128 @@ def load_font(size):
     except:
         return ImageFont.load_default()
 
-def draw_rounded_rect(draw, xy, radius, fill, outline=None, width=1):
-    x0, y0, x1, y1 = xy
-    draw.rounded_rectangle(xy, radius=radius, fill=fill, outline=outline, width=width)
+def scale_x(x):
+    return int(x * (CARD_W / ORIG_W))
+
+def scale_y(y):
+    return int(y * (CARD_H / ORIG_H))
 
 def create_card(carta, ilustracao_path, output_path):
     tipo = carta["tipo"]
-    colors = COLORS[tipo]
     is_interrupt = carta.get("interrupt", False)
 
-    # Carregar o template correspondente ao invés de criar fundo sólido
+    if tipo == "Final":
+        img = Image.new("RGBA", (CARD_W, CARD_H), (255, 255, 255, 255))
+    else:
+        if ilustracao_path and Path(ilustracao_path).exists():
+            illust = Image.open(ilustracao_path).convert("RGBA")
+            
+            # Coordenadas do buraco no template original (768x1024)
+            hole_x1, hole_y1 = scale_x(80), scale_y(88)
+            hole_x2, hole_y2 = scale_x(688), scale_y(814)
+            
+            hole_w = hole_x2 - hole_x1
+            hole_h = hole_y2 - hole_y1
+            
+            # Aumenta para 110% do tamanho do buraco para deixar uma sobra de 10% sob o template
+            target_w = int(hole_w * 1.1)
+            target_h = int(hole_h * 1.1)
+            
+            illust = illust.resize((target_w, target_h), Image.LANCZOS)
+            
+            # Fundo base da carta
+            img = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 255))
+            
+            # Centraliza a ilustração dentro do buraco
+            hole_cx = hole_x1 + hole_w // 2
+            hole_cy = hole_y1 + hole_h // 2
+            paste_x = hole_cx - target_w // 2
+            paste_y = hole_cy - target_h // 2
+            
+            img.paste(illust, (paste_x, paste_y), illust)
+        else:
+            img = Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 255))
+
+    # Carregar template correspondente e sobrepor (usa transparência do template)
     template_path = Path("templates") / f"template_{tipo}.png"
     if template_path.exists():
-        img = Image.open(template_path).convert("RGB")
-        img = img.resize((CARD_W, CARD_H), Image.LANCZOS)
-    else:
-        # Fallback se o template sumir
-        img = Image.new("RGB", (CARD_W, CARD_H), colors["bg"])
+        template = Image.open(template_path).convert("RGBA")
+        template = template.resize((CARD_W, CARD_H), Image.LANCZOS)
+        # alpha_composite garante que a transparência do template funcione sobre a imagem base
+        img = Image.alpha_composite(img, template)
     
     draw = ImageDraw.Draw(img)
 
-    # Faixa do tipo (topo) - Agora mais discreta, já que o template já é ornamentado
-    font_type = load_font(28)
-    label = TYPE_LABELS.get(tipo, tipo.upper())
-    if is_interrupt:
-        label = f"* {label} *"
-    bbox = draw.textbbox((0, 0), label, font=font_type)
-    tw = bbox[2] - bbox[0]
-    # Sombra para o texto do topo ser legível sobre o template
-    draw.text(((CARD_W - tw) // 2 + 2, BLEED + 22), label, fill="#000000AA", font=font_type)
-    draw.text(((CARD_W - tw) // 2, BLEED + 20), label, fill=colors["label"], font=font_type)
-
-    # Area da ilustracao (Centralizada no espaco superior do template)
-    if ilustracao_path and Path(ilustracao_path).exists():
-        illust = Image.open(ilustracao_path).convert("RGB")
-        # Redimensionar com alta qualidade
-        illust = illust.resize((IMG_AREA_W, IMG_AREA_H), Image.LANCZOS)
-        
-        # Moldura decorativa sutil ao redor da arte
-        border_w = 4
-        draw.rounded_rectangle(
-            (IMG_AREA_X - border_w, IMG_AREA_Y - border_w,
-             IMG_AREA_X + IMG_AREA_W + border_w, IMG_AREA_Y + IMG_AREA_H + border_w),
-            radius=15, fill=None, outline=colors["accent"], width=border_w
-        )
-        
-        # Mascara para cantos levemente arredondados
-        mask = Image.new("L", (IMG_AREA_W, IMG_AREA_H), 0)
-        mask_draw = ImageDraw.Draw(mask)
-        mask_draw.rounded_rectangle((0, 0, IMG_AREA_W, IMG_AREA_H), radius=12, fill=255)
-        img.paste(illust, (IMG_AREA_X, IMG_AREA_Y), mask)
-
-    # Texto da carta (Focado no Banner Inferior do template)
-    texto = carta["texto_pt"]
-    # Ajuste de Y para o banner inferior (baseado nos templates SDXL)
-    base_text_y = 835 
-
     if tipo == "Final":
-        font_title = load_font(26) # Fonte um pouco menor para finais longos
-        lines = textwrap.wrap(texto, width=38)
-        curr_y = base_text_y
+        # Usar Unifraktur Cook para o Final
+        font_final = load_font("UnifrakturCook.ttf", 60)
+        texto = carta["texto_pt"]
+        lines = textwrap.wrap(texto, width=18)
+        
+        # Desenhar os textos numa imagem temporária para poder rotacionar/inclinar (skew)
+        txt_img = Image.new("RGBA", (CARD_W, CARD_H), (255, 255, 255, 0))
+        txt_draw = ImageDraw.Draw(txt_img)
+        
+        # Centralizar verticalmente na imagem temporária
+        total_height = sum([txt_draw.textbbox((0, 0), line, font=font_final)[3] - txt_draw.textbbox((0, 0), line, font=font_final)[1] + 15 for line in lines])
+        curr_y = (CARD_H - total_height) // 2 + 50 
+        
         for line in lines:
-            bbox = draw.textbbox((0, 0), line, font=font_title)
+            bbox = txt_draw.textbbox((0, 0), line, font=font_final)
             tw = bbox[2] - bbox[0]
             th = bbox[3] - bbox[1]
-            # Texto escuro (marrom medieval) sobre o pergaminho
-            draw.text(((CARD_W - tw) // 2, curr_y), line, fill="#1A0F0A", font=font_title)
-            curr_y += th + 6
+            txt_draw.text(((CARD_W - tw) // 2 + 20, curr_y), line, fill="#382e25", font=font_final)
+            curr_y += th + 15
+            
+        # Rotação leve (skew) para acompanhar a inclinação do pergaminho do exemplo
+        txt_img = txt_img.rotate(3, resample=Image.BICUBIC, expand=False)
+        img = Image.alpha_composite(img, txt_img)
+            
     else:
-        font_title = load_font(44) # Titulo elegante e grande
+        colors = TYPE_COLORS.get(tipo, {'circle': '#e7987c', 'title': '#4f2015', 'type': '#e4a895', 'interrupt': '#8B1A1A'})
+        
+        # Bolinha Superior Direita (Numero da carta)
+        font_number = load_font("PirataOne.ttf", 84)
+        card_id = carta["id"]
+        
+        # Coordenadas originais do template 768x1024 fornecidas pelo usuário/calculadas
+        orig_cx = 628 # Deslocado levemente para a direita para centralizar perfeitamente
+        orig_cy = 115
+        draw.text((scale_x(orig_cx), scale_y(orig_cy)), card_id, fill=colors["circle"], font=font_number, anchor="mt")
+
+        # Rodapé - Nome da Carta
+        texto = carta["texto_pt"]
+        font_title = load_font("PirataOne.ttf", 65)
         bbox = draw.textbbox((0, 0), texto, font=font_title)
         tw = bbox[2] - bbox[0]
-        if tw > CARD_W - 160: # Margens de seguranca laterais
-            font_title = load_font(34)
-            bbox = draw.textbbox((0, 0), texto, font=font_title)
-            tw = bbox[2] - bbox[0]
-        draw.text(((CARD_W - tw) // 2, base_text_y + 15), texto, fill="#1A0F0A", font=font_title)
+        th = bbox[3] - bbox[1]
+        
+        if tw > CARD_W - 200:
+            font_title = load_font("PirataOne.ttf", 50)
+        
+        # Posição do texto do rodapé (Banner principal)
+        orig_title_cx = 384 # 768/2 (centro)
+        orig_title_cy = 833
+        draw.text((scale_x(orig_title_cx), scale_y(orig_title_cy)), texto, fill=colors["title"], font=font_title, anchor="mt")
 
-    # Simbolo de interrupcao (Discreto e elegante)
-    if is_interrupt:
-        font_int = load_font(20)
-        int_text = "INTERRUPÇÃO"
-        bbox = draw.textbbox((0, 0), int_text, font=font_int)
-        tw = bbox[2] - bbox[0]
-        int_y = CARD_H - BLEED - 75
-        badge_rect = ((CARD_W - tw) // 2 - 10, int_y - 4,
-                      (CARD_W + tw) // 2 + 10, int_y + 28)
-        draw_rounded_rect(draw, badge_rect, radius=6, fill="#701010EE")
-        draw.text(((CARD_W - tw) // 2, int_y), int_text, fill="#F0F0F0", font=font_int)
+        # Rodapé - Tipo da Carta
+        label = TYPE_LABELS.get(tipo, tipo.upper())
+        label = f"= {label} ="
+            
+        font_type = load_font("PirataOne.ttf", 45)
+        orig_type_cx = 384
+        orig_type_cy = 909
+        draw.text((scale_x(orig_type_cx), scale_y(orig_type_cy)), label, fill=colors["type"], font=font_type, anchor="mt")
+        
+        # Selo de Interrupção abaixo da borda inferior
+        if is_interrupt:
+            font_interrupt = load_font("PirataOne.ttf", 30)
+            orig_int_cx = 384
+            # A margem inferior do template (1024) termina por volta do pixel 964. O final é 1024. O meio é (964+1024)/2 = 994.
+            orig_int_cy = 994 
+            draw.text((scale_x(orig_int_cx), scale_y(orig_int_cy)), "INTERRUPÇÃO", fill=colors["interrupt"], font=font_interrupt, anchor="mm")
 
-    # Info tecnica (Deck e Numero)
-    font_small = load_font(15)
-    deck_label = f"Deck {carta['deck']} - #{carta['numero']:02d}"
-    draw.text((BLEED + 50, CARD_H - BLEED - 35), deck_label, fill="#1A0F0A90", font=font_small)
-
+    img = img.convert("RGB")
     img.save(output_path, dpi=(300, 300))
 
 def main():
@@ -144,6 +169,12 @@ def main():
 
     with open("cartas.json", "r", encoding="utf-8") as f:
         cartas = json.load(f)
+
+    # Filtrar por IDs fornecidos na linha de comando, se existirem
+    args_ids = sys.argv[1:]
+    if args_ids:
+        cartas = [c for c in cartas if c["id"] in args_ids]
+        print(f"Filtrando execução para {len(cartas)} cartas: {args_ids}")
 
     print(f"Montando {len(cartas)} cartas...")
 
