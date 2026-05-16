@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { applyNarratorRotation, getCurrentNarrator, getNextNarrator } from "@era-uma-vez/game-logic";
+import type { Player, Room } from "@era-uma-vez/shared-types";
+import { useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "../../lib/supabase";
 
@@ -8,17 +10,15 @@ function generateRoomCode(): string {
   return Math.random().toString(36).substring(2, 7).toUpperCase();
 }
 
-interface Player {
-  id: string;
-  name: string;
-  is_narrator: boolean;
-}
+type RoomSummary = Pick<Room, "id" | "code" | "status" | "narrator_id">;
 
 export default function MesaPage() {
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinUrl, setJoinUrl] = useState<string | null>(null);
-  const [roomId, setRoomId] = useState<string | null>(null);
+  const [room, setRoom] = useState<RoomSummary | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [roomError, setRoomError] = useState<string | null>(null);
+  const [isAdvancingTurn, setIsAdvancingTurn] = useState(false);
 
   useEffect(() => {
     const code = generateRoomCode();
@@ -32,45 +32,116 @@ export default function MesaPage() {
       const { data, error } = await supabase
         .from("rooms")
         .insert({ code, status: "lobby" })
-        .select("id")
+        .select("id, code, status, narrator_id")
         .single();
-      if (!error && data) setRoomId((data as { id: string }).id);
+      if (error) {
+        setRoomError("Não foi possível criar a sala.");
+        return;
+      }
+      if (data) setRoom(data as RoomSummary);
     })();
   }, []);
 
   useEffect(() => {
-    if (!supabase || !roomId) return;
+    if (!supabase || !room?.id) return;
 
     const fetchPlayers = () => {
-      void supabase!
+      void supabase
         .from("players")
-        .select("id, name, is_narrator")
-        .eq("room_id", roomId)
+        .select("id, room_id, name, avatar_url, is_narrator, status, hand, joined_at")
+        .eq("room_id", room.id)
+        .order("joined_at", { ascending: true })
         .then((result: { data: Player[] | null }) => {
           if (result.data) setPlayers(result.data);
         });
     };
 
+    const fetchRoom = () => {
+      void supabase
+        .from("rooms")
+        .select("id, code, status, narrator_id")
+        .eq("id", room.id)
+        .single()
+        .then((result: { data: RoomSummary | null }) => {
+          if (result.data) setRoom(result.data);
+        });
+    };
+
+    fetchRoom();
     fetchPlayers();
 
-    const channel = supabase
-      .channel(`room-players-${roomId}`)
+    const playersChannel = supabase
+      .channel(`room-players-${room.id}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "players",
-          filter: `room_id=eq.${roomId}`,
+          filter: `room_id=eq.${room.id}`,
         },
         fetchPlayers,
       )
       .subscribe();
 
+    const roomsChannel = supabase
+      .channel(`room-${room.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "rooms",
+          filter: `id=eq.${room.id}`,
+        },
+        fetchRoom,
+      )
+      .subscribe();
+
     return () => {
-      supabase!.removeChannel(channel);
+      void supabase.removeChannel(playersChannel);
+      void supabase.removeChannel(roomsChannel);
     };
-  }, [roomId]);
+  }, [room?.id]);
+
+  const activeNarrator = useMemo(
+    () => getCurrentNarrator(players, room?.narrator_id ?? null),
+    [players, room?.narrator_id],
+  );
+
+  useEffect(() => {
+    if (!supabase || !room?.id || players.length === 0) return;
+
+    const nextNarrator = activeNarrator ?? getNextNarrator(players, room.narrator_id);
+    if (!nextNarrator) return;
+
+    const synchronizedPlayers = applyNarratorRotation(players, nextNarrator.id);
+    const playersNeedSync = synchronizedPlayers.some((player, index) => {
+      const currentPlayer = players[index];
+      return (
+        currentPlayer?.is_narrator !== player.is_narrator || currentPlayer?.status !== player.status
+      );
+    });
+
+    if (!playersNeedSync && room.narrator_id === nextNarrator.id) return;
+
+    void persistNarratorTurn(room.id, players, nextNarrator.id, setRoomError);
+  }, [activeNarrator, players, room?.id, room?.narrator_id]);
+
+  async function handleAdvanceTurn() {
+    if (!room) return;
+
+    const nextNarrator = getNextNarrator(players, room.narrator_id);
+    if (!nextNarrator) return;
+
+    setIsAdvancingTurn(true);
+    setRoomError(null);
+    await persistNarratorTurn(room.id, players, nextNarrator.id, setRoomError);
+    setIsAdvancingTurn(false);
+  }
+
+  const connectedPlayers = players.filter((player) => player.status !== "disconnected");
+  const canAdvanceTurn = connectedPlayers.length > 1;
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-8 p-8">
@@ -104,6 +175,38 @@ export default function MesaPage() {
       ) : (
         <p className="opacity-60">Criando sala...</p>
       )}
+
+      {roomError ? <p className="text-sm text-red-300 text-center">{roomError}</p> : null}
+
+      <section className="flex flex-col items-center gap-3 text-center">
+        <h2 className="text-xl font-semibold" style={{ color: "var(--color-dourado)" }}>
+          Narrador ativo
+        </h2>
+        <p className="opacity-80">
+          {activeNarrator ? (
+            <>
+              👑 <strong>{activeNarrator.name}</strong> conduz a história agora.
+            </>
+          ) : (
+            "Aguardando jogadores para escolher o narrador."
+          )}
+        </p>
+        <button
+          type="button"
+          onClick={() => void handleAdvanceTurn()}
+          disabled={!canAdvanceTurn || isAdvancingTurn}
+          className="rounded-lg px-4 py-2 font-semibold transition-opacity disabled:opacity-40"
+          style={{
+            background: "var(--color-evento)",
+            color: "var(--color-pergaminho)",
+          }}
+        >
+          {isAdvancingTurn ? "Passando turno..." : "Passar turno"}
+        </button>
+        {!canAdvanceTurn && connectedPlayers.length === 1 ? (
+          <p className="text-sm opacity-60">É preciso mais de um jogador conectado para rotacionar.</p>
+        ) : null}
+      </section>
 
       <PlayerCircle players={players} />
     </main>
@@ -152,4 +255,36 @@ function PlayerCircle({ players }: { players: Player[] }) {
       })}
     </div>
   );
+}
+
+async function persistNarratorTurn(
+  roomId: string,
+  players: Player[],
+  narratorId: string,
+  setRoomError: (message: string | null) => void,
+) {
+  if (!supabase) return;
+
+  setRoomError(null);
+
+  const synchronizedPlayers = applyNarratorRotation(players, narratorId);
+  const updates = synchronizedPlayers.map((player) =>
+    supabase
+      .from("players")
+      .update({
+        is_narrator: player.is_narrator,
+        status: player.status,
+      })
+      .eq("id", player.id),
+  );
+
+  const [roomResult, ...playerResults] = await Promise.all([
+    supabase.from("rooms").update({ narrator_id: narratorId }).eq("id", roomId),
+    ...updates,
+  ]);
+
+  const failedPlayerUpdate = playerResults.find((result) => result.error);
+  if (roomResult.error || failedPlayerUpdate?.error) {
+    setRoomError("Não foi possível atualizar o turno do narrador.");
+  }
 }

@@ -18,7 +18,7 @@ Este arquivo é a memória persistente dos agentes. Cada tarefa deve ser marcada
 
 ## Sprint 2 — Lógica do Jogo
 
-- [ ] 8. Implementar lógica de turno (Narrador ativo, rotação de jogadores)
+- [x] 8. Implementar lógica de turno (Narrador ativo, rotação de jogadores)
 - [ ] 9. Implementar mecânica de interrupção de turno
 - [ ] 10. Implementar lógica de final aceito (Felizes para Sempre)
 - [ ] 11. Integrar Supabase Realtime para sincronização de eventos de jogo
