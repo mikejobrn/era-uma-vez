@@ -1,0 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Pirata+One&display=swap");
+
+:root {
+  --color-evento: #923c35;
+  --color-pergaminho: #f5ebdc;
+  --color-dourado: #c9a84c;
+  --color-fundo: #1a0e05;
+  --color-texto: #2c1a0e;
+
+  --font-title: "Cinzel", serif;
+  --font-display: "Pirata One", cursive;
+}

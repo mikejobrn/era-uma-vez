@@ -21,6 +21,7 @@ dist/
 .python-version
 .env
 .env.*
+!.env.example
 
 # Generated project artifacts
 ilustracoes/
@@ -29,3 +30,17 @@ ilustracoes/
 # OS/editor noise
 .DS_Store
 Thumbs.db
+
+# Node / JavaScript
+node_modules/
+.next/
+.turbo/
+*.tsbuildinfo
+out/
+
+# PWA generated files
+public/sw.js
+public/workbox-*.js
+public/worker-*.js
+public/sw.js.map
+public/workbox-*.js.map

@@ -1,0 +1,46 @@
+@font-face {
+  font-family: "Cinzel";
+  src: url("/fonts/Cinzel-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PirataOne";
+  src: url("/fonts/PirataOne.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "UnifrakturCook";
+  src: url("/fonts/UnifrakturCook.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@import "tailwindcss";
+
+:root {
+  --color-evento: #923c35;
+  --color-pergaminho: #f5ebdc;
+  --color-dourado: #c9a84c;
+  --color-fundo: #1a0e05;
+  --color-texto: #2c1a0e;
+}
+
+@theme inline {
+  --color-evento: var(--color-evento);
+  --color-pergaminho: var(--color-pergaminho);
+  --color-dourado: var(--color-dourado);
+  --color-fundo: var(--color-fundo);
+  --color-texto: var(--color-texto);
+  --font-title: "Cinzel", serif;
+  --font-display: "PirataOne", cursive;
+}
+
+body {
+  background: var(--color-fundo);
+  color: var(--color-pergaminho);
+  font-family: "Cinzel", serif;
+}
