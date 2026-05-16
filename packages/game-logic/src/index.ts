@@ -125,6 +125,19 @@ export function checkVictory(room: Room): PlayedCard | null {
   return null;
 }
 
+// ─── Deal Cards ───────────────────────────────────────────────────────────────
+
+/**
+ * Shuffles the deck and distributes handSize cards to each player sequentially.
+ */
+export function dealCards(deck: Card[], players: Player[], handSize = 7): Player[] {
+  const shuffled = [...deck].sort(() => Math.random() - 0.5);
+  return players.map((player, i) => ({
+    ...player,
+    hand: shuffled.slice(i * handSize, (i + 1) * handSize),
+  }));
+}
+
 // ─── Event Factory ────────────────────────────────────────────────────────────
 
 export function createGameEvent(

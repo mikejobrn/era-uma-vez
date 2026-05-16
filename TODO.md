@@ -19,21 +19,21 @@ Este arquivo é a memória persistente dos agentes. Cada tarefa deve ser marcada
 ## Sprint 2 — Lógica do Jogo
 
 - [x] 8. Implementar lógica de turno (Narrador ativo, rotação de jogadores)
-- [ ] 9. Implementar mecânica de interrupção de turno
-- [ ] 10. Implementar lógica de final aceito (Felizes para Sempre)
-- [ ] 11. Integrar Supabase Realtime para sincronização de eventos de jogo
-- [ ] 12. Implementar reconexão automática via `localStorage` (session token)
+- [x] 9. Implementar mecânica de interrupção de turno
+- [x] 10. Implementar lógica de final aceito (Felizes para Sempre)
+- [x] 11. Integrar Supabase Realtime para sincronização de eventos de jogo
+- [x] 12. Implementar reconexão automática via `localStorage` (session token)
 
 ---
 
 ## Sprint 3 — UI/UX
 
-- [ ] 13. Implementar leque de cartas horizontal no celular (Swipe Up para jogar)
-- [ ] 14. Destaque da carta de Final (Felizes para Sempre) no leque
-- [ ] 15. Animar histórico de cartas jogadas na Mesa com Framer Motion
-- [ ] 16. Implementar "Desfazer Jogada" com veto dos jogadores
-- [ ] 17. Adicionar SFX (efeitos sonoros) ao jogar cartas
-- [ ] 18. Implementar animação de confetes na vitória (Final Aceito)
+- [x] 13. Implementar leque de cartas horizontal no celular (Swipe Up para jogar)
+- [x] 14. Destaque da carta de Final (Felizes para Sempre) no leque
+- [x] 15. Animar histórico de cartas jogadas na Mesa com Framer Motion
+- [x] 16. Implementar "Desfazer Jogada" com veto dos jogadores
+- [x] 17. Adicionar SFX (efeitos sonoros) ao jogar cartas
+- [x] 18. Implementar animação de confetes na vitória (Final Aceito)
 
 ---
 

@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import type { Player } from "@era-uma-vez/shared-types";
+import type { Card, Player, PlayedCard, Room } from "@era-uma-vez/shared-types";
 
-import { applyNarratorRotation, getCurrentNarrator, getNextNarrator } from "./index";
+import {
+  applyNarratorRotation,
+  canInterrupt,
+  checkVictory,
+  dealCards,
+  getCurrentNarrator,
+  getNextNarrator,
+  undoLastMove,
+} from "./index";
 
 function createPlayer(overrides: Partial<Player>): Player {
   return {
@@ -60,5 +68,117 @@ describe("turn logic", () => {
       expect.objectContaining({ id: "p2", is_narrator: true, status: "active" }),
       expect.objectContaining({ id: "p3", is_narrator: false, status: "disconnected" }),
     ]);
+  });
+});
+
+function createCard(overrides: Partial<Card>): Card {
+  return {
+    id: overrides.id ?? crypto.randomUUID(),
+    deck: overrides.deck ?? "A",
+    numero: overrides.numero ?? 1,
+    tipo: overrides.tipo ?? "Personagem",
+    texto_pt: overrides.texto_pt ?? "Uma carta",
+    texto_en: overrides.texto_en ?? "A card",
+    interrupt: overrides.interrupt ?? false,
+    prompt_en: overrides.prompt_en ?? "",
+  };
+}
+
+function createRoom(overrides: Partial<Room>): Room {
+  return {
+    id: overrides.id ?? "room-1",
+    code: overrides.code ?? "ABCDE",
+    status: overrides.status ?? "in_progress",
+    narrator_id: overrides.narrator_id ?? null,
+    story_log: overrides.story_log ?? [],
+    created_at: overrides.created_at ?? "2026-01-01T00:00:00.000Z",
+  };
+}
+
+function createPlayedCard(overrides: Partial<PlayedCard>): PlayedCard {
+  return {
+    player_id: overrides.player_id ?? "p1",
+    player_name: overrides.player_name ?? "Player",
+    card: overrides.card ?? createCard({}),
+    played_at: overrides.played_at ?? "2026-01-01T00:00:00.000Z",
+  };
+}
+
+describe("canInterrupt", () => {
+  it("returns true for interrupt cards", () => {
+    const interruptCard = createCard({ interrupt: true });
+    expect(canInterrupt(interruptCard)).toBe(true);
+  });
+
+  it("returns false for non-interrupt cards", () => {
+    const normalCard = createCard({ interrupt: false });
+    expect(canInterrupt(normalCard)).toBe(false);
+  });
+});
+
+describe("dealCards", () => {
+  it("distributes the correct number of cards to each player", () => {
+    const deck = Array.from({ length: 20 }, (_, i) => createCard({ id: `card-${i}`, numero: i }));
+    const players = [
+      createPlayer({ id: "p1" }),
+      createPlayer({ id: "p2" }),
+    ];
+    const result = dealCards(deck, players, 7);
+    expect(result[0]!.hand).toHaveLength(7);
+    expect(result[1]!.hand).toHaveLength(7);
+  });
+
+  it("gives each player distinct cards", () => {
+    const deck = Array.from({ length: 20 }, (_, i) => createCard({ id: `card-${i}`, numero: i }));
+    const players = [
+      createPlayer({ id: "p1" }),
+      createPlayer({ id: "p2" }),
+    ];
+    const result = dealCards(deck, players, 7);
+    const p1Ids = result[0]!.hand.map((c) => c.id);
+    const p2Ids = result[1]!.hand.map((c) => c.id);
+    const overlap = p1Ids.filter((id) => p2Ids.includes(id));
+    expect(overlap).toHaveLength(0);
+  });
+
+  it("preserves other player properties", () => {
+    const deck = Array.from({ length: 10 }, (_, i) => createCard({ id: `card-${i}`, numero: i }));
+    const players = [createPlayer({ id: "p1", name: "Hero" })];
+    const result = dealCards(deck, players, 5);
+    expect(result[0]!.name).toBe("Hero");
+    expect(result[0]!.id).toBe("p1");
+  });
+});
+
+describe("checkVictory", () => {
+  it("returns null when story log is empty", () => {
+    const room = createRoom({ story_log: [] });
+    expect(checkVictory(room)).toBeNull();
+  });
+
+  it("returns null when last card is not a Final card", () => {
+    const entry = createPlayedCard({ card: createCard({ tipo: "Personagem" }) });
+    const room = createRoom({ story_log: [entry] });
+    expect(checkVictory(room)).toBeNull();
+  });
+
+  it("returns the played card when last card is Final", () => {
+    const finalEntry = createPlayedCard({ card: createCard({ tipo: "Final" }) });
+    const room = createRoom({ story_log: [createPlayedCard({}), finalEntry] });
+    expect(checkVictory(room)).toEqual(finalEntry);
+  });
+});
+
+describe("undoLastMove", () => {
+  it("returns empty array when log is already empty", () => {
+    expect(undoLastMove([])).toEqual([]);
+  });
+
+  it("removes the last entry from the log", () => {
+    const entry1 = createPlayedCard({ player_id: "p1" });
+    const entry2 = createPlayedCard({ player_id: "p2" });
+    const result = undoLastMove([entry1, entry2]);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(entry1);
   });
 });
