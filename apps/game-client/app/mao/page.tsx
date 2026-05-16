@@ -46,15 +46,16 @@ function MaoContent() {
 
   useEffect(() => {
     if (!supabase || !session?.roomId) return;
+    const client = supabase;
 
     const syncRoomState = async () => {
       const [{ data: room }, { data: players }] = await Promise.all([
-        supabase
+        client
           .from("rooms")
           .select("id, code, status, narrator_id")
           .eq("id", session.roomId)
           .single(),
-        supabase
+        client
           .from("players")
           .select("id, room_id, name, avatar_url, is_narrator, status, hand, joined_at")
           .eq("room_id", session.roomId)
@@ -71,7 +72,7 @@ function MaoContent() {
 
     void syncRoomState();
 
-    const roomChannel = supabase
+    const roomChannel = client
       .channel(`mao-room-${session.roomId}`)
       .on(
         "postgres_changes",
@@ -85,7 +86,7 @@ function MaoContent() {
       )
       .subscribe();
 
-    const playersChannel = supabase
+    const playersChannel = client
       .channel(`mao-players-${session.roomId}`)
       .on(
         "postgres_changes",
@@ -100,8 +101,8 @@ function MaoContent() {
       .subscribe();
 
     return () => {
-      void supabase.removeChannel(roomChannel);
-      void supabase.removeChannel(playersChannel);
+      void client.removeChannel(roomChannel);
+      void client.removeChannel(playersChannel);
     };
   }, [session?.playerId, session?.roomId]);
 

@@ -44,9 +44,10 @@ export default function MesaPage() {
 
   useEffect(() => {
     if (!supabase || !room?.id) return;
+    const client = supabase;
 
     const fetchPlayers = () => {
-      void supabase
+      void client
         .from("players")
         .select("id, room_id, name, avatar_url, is_narrator, status, hand, joined_at")
         .eq("room_id", room.id)
@@ -57,7 +58,7 @@ export default function MesaPage() {
     };
 
     const fetchRoom = () => {
-      void supabase
+      void client
         .from("rooms")
         .select("id, code, status, narrator_id")
         .eq("id", room.id)
@@ -70,7 +71,7 @@ export default function MesaPage() {
     fetchRoom();
     fetchPlayers();
 
-    const playersChannel = supabase
+    const playersChannel = client
       .channel(`room-players-${room.id}`)
       .on(
         "postgres_changes",
@@ -84,7 +85,7 @@ export default function MesaPage() {
       )
       .subscribe();
 
-    const roomsChannel = supabase
+    const roomsChannel = client
       .channel(`room-${room.id}`)
       .on(
         "postgres_changes",
@@ -99,8 +100,8 @@ export default function MesaPage() {
       .subscribe();
 
     return () => {
-      void supabase.removeChannel(playersChannel);
-      void supabase.removeChannel(roomsChannel);
+      void client.removeChannel(playersChannel);
+      void client.removeChannel(roomsChannel);
     };
   }, [room?.id]);
 
@@ -264,12 +265,13 @@ async function persistNarratorTurn(
   setRoomError: (message: string | null) => void,
 ) {
   if (!supabase) return;
+  const client = supabase;
 
   setRoomError(null);
 
   const synchronizedPlayers = applyNarratorRotation(players, narratorId);
   const updates = synchronizedPlayers.map((player) =>
-    supabase
+    client
       .from("players")
       .update({
         is_narrator: player.is_narrator,
@@ -279,7 +281,7 @@ async function persistNarratorTurn(
   );
 
   const [roomResult, ...playerResults] = await Promise.all([
-    supabase.from("rooms").update({ narrator_id: narratorId }).eq("id", roomId),
+    client.from("rooms").update({ narrator_id: narratorId }).eq("id", roomId),
     ...updates,
   ]);
 
