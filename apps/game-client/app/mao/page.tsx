@@ -1,5 +1,7 @@
 "use client";
 
+import { getCurrentNarrator } from "@era-uma-vez/game-logic";
+import type { Player, Room } from "@era-uma-vez/shared-types";
 import { useSearchParams } from "next/navigation";
 import { useState, Suspense, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
@@ -21,6 +23,9 @@ function MaoContent() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeNarratorName, setActiveNarratorName] = useState<string | null>(null);
+  const [isCurrentNarrator, setIsCurrentNarrator] = useState(false);
+  const [roomStatus, setRoomStatus] = useState<Room["status"] | null>(null);
 
   useEffect(() => {
     if (!salaCode) return;
@@ -38,6 +43,68 @@ function MaoContent() {
       // ignore parse errors
     }
   }, [salaCode]);
+
+  useEffect(() => {
+    if (!supabase || !session?.roomId) return;
+    const client = supabase;
+
+    const syncRoomState = async () => {
+      const [{ data: room }, { data: players }] = await Promise.all([
+        client
+          .from("rooms")
+          .select("id, code, status, narrator_id")
+          .eq("id", session.roomId)
+          .single(),
+        client
+          .from("players")
+          .select("id, room_id, name, avatar_url, is_narrator, status, hand, joined_at")
+          .eq("room_id", session.roomId)
+          .order("joined_at", { ascending: true }),
+      ]);
+
+      if (!room || !players) return;
+
+      const narrator = getCurrentNarrator(players as Player[], (room as Room).narrator_id);
+      setActiveNarratorName(narrator?.name ?? null);
+      setIsCurrentNarrator(narrator?.id === session.playerId);
+      setRoomStatus((room as Room).status);
+    };
+
+    void syncRoomState();
+
+    const roomChannel = client
+      .channel(`mao-room-${session.roomId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "rooms",
+          filter: `id=eq.${session.roomId}`,
+        },
+        () => void syncRoomState(),
+      )
+      .subscribe();
+
+    const playersChannel = client
+      .channel(`mao-players-${session.roomId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "players",
+          filter: `room_id=eq.${session.roomId}`,
+        },
+        () => void syncRoomState(),
+      )
+      .subscribe();
+
+    return () => {
+      void client.removeChannel(roomChannel);
+      void client.removeChannel(playersChannel);
+    };
+  }, [session?.playerId, session?.roomId]);
 
   async function handleJoin(e: React.FormEvent) {
     e.preventDefault();
@@ -118,6 +185,25 @@ function MaoContent() {
           Você entrou na sala <strong>{salaCode}</strong> como{" "}
           <strong>{session.playerName}</strong>. Aguarde o início da partida.
         </p>
+        <div className="text-center opacity-80">
+          <p>
+            {activeNarratorName ? (
+              <>
+                Narrador ativo: <strong>{activeNarratorName}</strong>
+              </>
+            ) : (
+              "Aguardando a definição do narrador."
+            )}
+          </p>
+          <p className="text-sm opacity-70 mt-2">
+            Estado da sala: <strong>{roomStatus ?? "lobby"}</strong>
+          </p>
+          {isCurrentNarrator ? (
+            <p className="mt-2 text-sm" style={{ color: "var(--color-dourado)" }}>
+              É a sua vez de narrar a história.
+            </p>
+          ) : null}
+        </div>
         {/* Hand (card fan) will be rendered here once game starts */}
       </main>
     );

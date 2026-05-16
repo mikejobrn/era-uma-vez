@@ -2,6 +2,12 @@ import type { Room, Player, Card, PlayedCard, GameEvent } from "@era-uma-vez/sha
 
 // ─── Turn Logic ───────────────────────────────────────────────────────────────
 
+function getNarrationOrder(players: Player[]): Player[] {
+  return [...players]
+    .filter((player) => player.status !== "disconnected")
+    .sort((left, right) => left.joined_at.localeCompare(right.joined_at));
+}
+
 /**
  * Returns the next narrator index in a round-robin fashion.
  */
@@ -14,11 +20,47 @@ export function getNextNarratorIndex(players: Player[], currentNarratorId: strin
 /**
  * Returns the next narrator player.
  */
-export function getNextNarrator(players: Player[], currentNarratorId: string): Player | null {
-  const activePlayers = players.filter((p) => p.status !== "disconnected");
+export function getNextNarrator(players: Player[], currentNarratorId: string | null): Player | null {
+  const activePlayers = getNarrationOrder(players);
   if (activePlayers.length === 0) return null;
+  if (!currentNarratorId) return activePlayers[0] ?? null;
   const nextIndex = getNextNarratorIndex(activePlayers, currentNarratorId);
   return activePlayers[nextIndex] ?? null;
+}
+
+/**
+ * Returns the active narrator based on the stored narrator id or player flags.
+ */
+export function getCurrentNarrator(players: Player[], narratorId: string | null): Player | null {
+  const activePlayers = getNarrationOrder(players);
+  if (activePlayers.length === 0) return null;
+
+  if (narratorId) {
+    const narrator = activePlayers.find((player) => player.id === narratorId);
+    if (narrator) return narrator;
+  }
+
+  return activePlayers.find((player) => player.is_narrator) ?? null;
+}
+
+/**
+ * Applies narrator flags and statuses for the provided narrator id.
+ */
+export function applyNarratorRotation(players: Player[], narratorId: string | null): Player[] {
+  return players.map((player) => {
+    if (player.status === "disconnected") {
+      return {
+        ...player,
+        is_narrator: false,
+      };
+    }
+
+    return {
+      ...player,
+      is_narrator: player.id === narratorId,
+      status: player.id === narratorId ? "active" : "waiting",
+    };
+  });
 }
 
 // ─── Hand Logic ───────────────────────────────────────────────────────────────
