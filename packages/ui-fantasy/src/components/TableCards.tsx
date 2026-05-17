@@ -13,8 +13,8 @@ const CARD_TYPE_COLORS: Record<string, string> = {
   Final: "#c9a84c",
 };
 
-const CARD_W = 70;
-const CARD_H = 100;
+const CARD_W = 160;
+const CARD_H = 224;
 
 interface TableCardsProps {
   entries: PlayedCard[];
@@ -53,19 +53,22 @@ export const TableCards: FC<TableCardsProps> = ({ entries }) => {
             style={{
               width: CARD_W,
               height: CARD_H,
-              borderRadius: 8,
+              borderRadius: 10,
               background: bgColor,
               border: isFinal
                 ? "2px solid #c9a84c"
                 : "1px solid rgba(255,255,255,0.2)",
               boxShadow: isFinal
-                ? "0 0 8px rgba(201,168,76,0.5), 0 2px 6px rgba(0,0,0,0.4)"
-                : "0 2px 6px rgba(0,0,0,0.4)",
+                ? "0 0 12px rgba(201,168,76,0.6), 0 4px 12px rgba(0,0,0,0.5)"
+                : "0 4px 12px rgba(0,0,0,0.5)",
               overflow: "hidden",
               flexShrink: 0,
               position: "relative",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
+            {/* Card image */}
             <img
               src={cardImageUrl}
               alt={entry.card.texto_pt}
@@ -74,6 +77,8 @@ export const TableCards: FC<TableCardsProps> = ({ entries }) => {
               }}
               draggable={false}
               style={{
+                position: "absolute",
+                inset: 0,
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
@@ -81,18 +86,59 @@ export const TableCards: FC<TableCardsProps> = ({ entries }) => {
                 userSelect: "none",
               }}
             />
-            {isFinal && (
+            {/* Top: type badge */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                padding: "6px 8px 16px",
+                background: "linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               <span
                 style={{
-                  position: "absolute",
-                  top: 4,
-                  right: 4,
-                  fontSize: 12,
+                  fontSize: 10,
+                  fontFamily: "var(--font-display), cursive",
+                  color: "rgba(255,255,255,0.9)",
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                  lineHeight: 1,
                 }}
               >
-                ⭐
+                {entry.card.tipo}
               </span>
-            )}
+              {isFinal && <span style={{ fontSize: 13 }}>⭐</span>}
+            </div>
+            {/* Bottom: card text */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: "20px 10px 10px",
+                background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0) 100%)",
+              }}
+            >
+              <p
+                style={{
+                  color: "#f5ebdc",
+                  fontSize: 12,
+                  fontFamily: "var(--font-title), serif",
+                  textAlign: "center",
+                  lineHeight: 1.45,
+                  margin: 0,
+                  fontStyle: isFinal ? "italic" : "normal",
+                }}
+              >
+                {entry.card.texto_pt}
+              </p>
+            </div>
           </motion.div>
         );
       })}

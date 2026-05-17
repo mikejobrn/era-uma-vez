@@ -18,12 +18,12 @@ const CARD_TYPE_COLORS: Record<string, string> = {
   Final: "#c9a84c",
 };
 
-const CARD_W = 82;
-const CARD_H = 124;
+const CARD_W = 130;
+const CARD_H = 182;
 /** Total height of the fan container. Cards sit at bottom; selected card lifts up. */
-const CONTAINER_H = CARD_H + 52;
+const CONTAINER_H = CARD_H + 72;
 /** Side padding to absorb the horizontal overflow caused by rotation. */
-const SIDE = 36;
+const SIDE = 48;
 
 function sortInitial(cards: Card[]): Card[] {
   return [...cards].sort((a, b) => {
@@ -132,7 +132,7 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
             initial={{ rotate: angle, y: 20, opacity: 0, scale: 0.85 }}
             animate={{
               rotate: isSelected || isPlaying ? 0 : angle,
-              y: isPlaying ? -80 : isSelected ? -46 : 0,
+              y: isPlaying ? -120 : isSelected ? -60 : 0,
               opacity: isPlaying ? 0 : 1,
               scale: isPlaying ? 0.8 : isSelected ? 1.08 : 1,
               zIndex,
@@ -198,8 +198,8 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
             <span
               style={{
                 position: "absolute",
-                top: 6,
-                fontSize: 9,
+                top: 8,
+                fontSize: 11,
                 fontFamily: "var(--font-display), cursive",
                 color: "rgba(255,255,255,0.75)",
                 textTransform: "uppercase",
@@ -210,7 +210,7 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
               {card.tipo}
             </span>
             {isFinal && (
-              <span style={{ position: "absolute", top: 22, fontSize: 14, zIndex: 2 }}>
+              <span style={{ position: "absolute", top: 26, fontSize: 18, zIndex: 2 }}>
                 ⭐
               </span>
             )}
@@ -218,16 +218,16 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
             <span
               style={{
                 position: "absolute",
-                bottom: isSelected ? 34 : 8,
-                left: 6,
-                right: 6,
-                fontSize: 9,
+                bottom: isSelected ? 44 : 10,
+                left: 8,
+                right: 8,
+                fontSize: 11,
                 color: "#f5ebdc",
                 textAlign: "center",
-                lineHeight: 1.3,
+                lineHeight: 1.35,
                 overflow: "hidden",
                 display: "-webkit-box",
-                WebkitLineClamp: 3,
+                WebkitLineClamp: 4,
                 WebkitBoxOrient: "vertical" as const,
                 zIndex: 2,
                 transition: "bottom 0.15s",
@@ -251,14 +251,14 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
                   }}
                   style={{
                     position: "absolute",
-                    bottom: 6,
+                    bottom: 8,
                     zIndex: 10,
-                    padding: "3px 10px",
+                    padding: "4px 14px",
                     borderRadius: 6,
                     background: "#c9a84c",
                     color: "#1a0e05",
                     fontWeight: 700,
-                    fontSize: 11,
+                    fontSize: 12,
                     border: "none",
                     cursor: "pointer",
                     fontFamily: "var(--font-title), serif",
