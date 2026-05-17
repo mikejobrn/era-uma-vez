@@ -288,13 +288,13 @@ export default function MesaPage() {
       {/* ── Left panel ──────────────────────────────────────── */}
       <div
         style={{
-          width: 300,
-          minWidth: 240,
+          width: 260,
+          minWidth: 200,
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
-          padding: "16px 20px",
-          gap: 16,
+          padding: "12px 14px",
+          gap: 12,
           borderRight: "1px solid rgba(201,168,76,0.2)",
           overflowY: "auto",
         }}
@@ -378,91 +378,81 @@ export default function MesaPage() {
         {/* Narrator section */}
         <div
           style={{
-            borderRadius: 10,
+            borderRadius: 8,
             background: "rgba(201,168,76,0.08)",
             border: "1px solid rgba(201,168,76,0.25)",
-            padding: "12px 14px",
+            padding: "8px 10px",
             display: "flex",
             flexDirection: "column",
-            gap: 8,
+            gap: 6,
           }}
         >
-          <h2
-            style={{
-              color: "var(--color-dourado)",
-              fontFamily: "var(--font-title), serif",
-              fontSize: 13,
-              margin: 0,
-              textTransform: "uppercase",
-              letterSpacing: 1,
-              opacity: 0.8,
-            }}
-          >
-            Narrador
-          </h2>
-          <p style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>
-            {activeNarrator ? (
-              <>👑 {activeNarrator.name}</>
-            ) : (
-              <span style={{ opacity: 0.5, fontWeight: 400, fontSize: 13 }}>
-                Aguardando jogadores…
-              </span>
-            )}
-          </p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
+            <span
+              style={{
+                color: "var(--color-dourado)",
+                fontFamily: "var(--font-title), serif",
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: 1,
+                opacity: 0.7,
+              }}
+            >
+              Narrador
+            </span>
+            <span style={{ fontSize: 13, fontWeight: 600, opacity: activeNarrator ? 1 : 0.4 }}>
+              {activeNarrator ? `👑 ${activeNarrator.name}` : "—"}
+            </span>
+          </div>
 
-          {/* Action buttons */}
+          {/* Action buttons — compact row */}
           {isInProgress && (
-            <div style={{ display: "flex", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 5 }}>
               <button
                 type="button"
                 onClick={() => void handleAdvanceTurn()}
                 disabled={!canAdvanceTurn || isAdvancingTurn}
+                title="Passar turno"
                 style={{
                   flex: 1,
-                  padding: "7px 10px",
-                  borderRadius: 8,
+                  padding: "4px 6px",
+                  borderRadius: 6,
                   background: "var(--color-evento)",
                   color: "var(--color-pergaminho)",
                   fontFamily: "var(--font-title), serif",
                   fontWeight: 600,
-                  fontSize: 13,
+                  fontSize: 11,
                   border: "none",
                   cursor: canAdvanceTurn ? "pointer" : "not-allowed",
                   opacity: !canAdvanceTurn || isAdvancingTurn ? 0.45 : 1,
                   whiteSpace: "nowrap",
                 }}
               >
-                {isAdvancingTurn ? "Passando…" : "⏭ Passar turno"}
+                {isAdvancingTurn ? "…" : "⏭ Turno"}
               </button>
 
               {storyLog.length > 0 && (
                 <button
                   type="button"
                   onClick={() => void handleUndo()}
+                  title="Desfazer última jogada"
                   style={{
-                    flex: 1,
-                    padding: "7px 10px",
-                    borderRadius: 8,
+                    padding: "4px 8px",
+                    borderRadius: 6,
                     background: "rgba(120,80,30,0.35)",
                     color: "var(--color-dourado)",
                     fontFamily: "var(--font-title), serif",
                     fontWeight: 600,
-                    fontSize: 13,
+                    fontSize: 11,
                     border: "1px solid rgba(201,168,76,0.4)",
                     cursor: "pointer",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  ↩ Desfazer
+                  ↩
                 </button>
               )}
             </div>
-          )}
-
-          {!canAdvanceTurn && connectedPlayers.length === 1 && isInProgress && (
-            <p style={{ fontSize: 11, opacity: 0.5, margin: 0 }}>
-              Precisa de mais de um jogador para rotacionar.
-            </p>
           )}
         </div>
       </div>
