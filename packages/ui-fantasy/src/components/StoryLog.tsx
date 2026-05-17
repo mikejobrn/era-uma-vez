@@ -7,6 +7,7 @@ import type { PlayedCard } from "@era-uma-vez/shared-types";
 interface StoryLogProps {
   entries: PlayedCard[];
   onUndo?: () => void;
+  descending?: boolean;
 }
 
 const CARD_TYPE_COLORS: Record<string, string> = {
@@ -22,7 +23,7 @@ const CARD_TYPE_COLORS: Record<string, string> = {
  * Exibe o histórico encadeado das cartas jogadas com animação Framer Motion.
  * Inclui opção de "Desfazer Jogada" para veto dos jogadores.
  */
-export const StoryLog: FC<StoryLogProps> = ({ entries, onUndo }) => {
+export const StoryLog: FC<StoryLogProps> = ({ entries, onUndo, descending = false }) => {
   if (entries.length === 0) {
     return (
       <div
@@ -39,6 +40,8 @@ export const StoryLog: FC<StoryLogProps> = ({ entries, onUndo }) => {
     );
   }
 
+  const orderedEntries = descending ? [...entries].reverse() : entries;
+
   return (
     <div
       style={{
@@ -51,9 +54,10 @@ export const StoryLog: FC<StoryLogProps> = ({ entries, onUndo }) => {
       }}
     >
       <AnimatePresence initial={false}>
-        {entries.map((entry, index) => {
+        {orderedEntries.map((entry, index) => {
           const isFinal = entry.card.tipo === "Final";
           const accentColor = CARD_TYPE_COLORS[entry.card.tipo] ?? "#923c35";
+          const cardImageUrl = `/cards/${entry.card.id}.png`;
           return (
             <motion.div
               key={`${entry.player_id}-${entry.played_at}-${index}`}
@@ -106,17 +110,34 @@ export const StoryLog: FC<StoryLogProps> = ({ entries, onUndo }) => {
                 </span>
                 {isFinal && <span style={{ fontSize: 14 }}>⭐</span>}
               </div>
-              <p
-                style={{
-                  fontSize: 13,
-                  color: "#f5ebdc",
-                  lineHeight: 1.4,
-                  margin: 0,
-                  fontFamily: "var(--font-title), serif",
-                }}
-              >
-                {entry.card.texto_pt}
-              </p>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <img
+                  src={cardImageUrl}
+                  alt={entry.card.texto_pt}
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                  style={{
+                    width: 56,
+                    height: 80,
+                    borderRadius: 6,
+                    objectFit: "cover",
+                    border: "1px solid rgba(245,235,220,0.2)",
+                    flexShrink: 0,
+                  }}
+                />
+                <p
+                  style={{
+                    fontSize: 13,
+                    color: "#f5ebdc",
+                    lineHeight: 1.4,
+                    margin: 0,
+                    fontFamily: "var(--font-title), serif",
+                  }}
+                >
+                  {entry.card.texto_pt}
+                </p>
+              </div>
             </motion.div>
           );
         })}

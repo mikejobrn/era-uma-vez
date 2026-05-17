@@ -132,10 +132,29 @@ export function checkVictory(room: Room): PlayedCard | null {
  */
 export function dealCards(deck: Card[], players: Player[], handSize = 7): Player[] {
   const shuffled = [...deck].sort(() => Math.random() - 0.5);
-  return players.map((player, i) => ({
-    ...player,
-    hand: shuffled.slice(i * handSize, (i + 1) * handSize),
-  }));
+  let deckIndex = 0;
+
+  return players.map((player) => {
+    const hand: Card[] = [];
+    let hasFinalCard = false;
+
+    while (hand.length < handSize && deckIndex < shuffled.length) {
+      const card = shuffled[deckIndex++];
+      if (!card) break;
+
+      if (card.tipo === "Final") {
+        if (hasFinalCard) continue;
+        hasFinalCard = true;
+      }
+
+      hand.push(card);
+    }
+
+    return {
+      ...player,
+      hand,
+    };
+  });
 }
 
 // ─── Event Factory ────────────────────────────────────────────────────────────
