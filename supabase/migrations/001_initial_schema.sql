@@ -29,7 +29,7 @@ create policy "cards_select_public" on public.cards
 
 -- ─── Tabela: rooms ───────────────────────────────────────────
 create table if not exists public.rooms (
-  id           uuid        primary key default uuid_generate_v4(),
+  id           uuid        primary key default gen_random_uuid(),
   code         text        not null unique,           -- código curto para entrar
   status       text        not null default 'lobby' check (status in ('lobby','in_progress','finished')),
   narrator_id  uuid,                                   -- FK para players.id (set after first player joins)
@@ -53,7 +53,7 @@ create policy "rooms_update_anon" on public.rooms
 
 -- ─── Tabela: players ─────────────────────────────────────────
 create table if not exists public.players (
-  id           uuid        primary key default uuid_generate_v4(),
+  id           uuid        primary key default gen_random_uuid(),
   room_id      uuid        not null references public.rooms (id) on delete cascade,
   name         text        not null,
   avatar_url   text,
