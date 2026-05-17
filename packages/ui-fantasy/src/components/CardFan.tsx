@@ -9,20 +9,11 @@ interface CardFanProps {
   onPlay?: (card: Card) => void;
 }
 
-const CARD_TYPE_COLORS: Record<string, string> = {
-  Evento: "#923c35",
-  Personagem: "#2c5f8a",
-  Lugar: "#3d7a4f",
-  Coisa: "#7a5c2e",
-  Aspecto: "#6b4a8a",
-  Final: "#c9a84c",
-};
-
 const CARD_W = 130;
 const CARD_H = 182;
-/** Total height of the fan container. Cards sit at bottom; selected card lifts up. */
+/** Total height of the fan container. */
 const CONTAINER_H = CARD_H + 72;
-/** Side padding to absorb the horizontal overflow caused by rotation. */
+/** Side padding to absorb horizontal overflow caused by rotation. */
 const SIDE = 48;
 
 function sortInitial(cards: Card[]): Card[] {
@@ -33,14 +24,12 @@ function sortInitial(cards: Card[]): Card[] {
   });
 }
 
-/** Returns the rotation angle (degrees) for card at position i out of n total. */
 function getAngle(i: number, n: number): number {
   if (n <= 1) return 0;
   const maxAngle = Math.min(52, Math.max(14, n * 6));
   return -maxAngle + (i * 2 * maxAngle) / (n - 1);
 }
 
-/** Returns the left-edge pixel offset for each card given the container width. */
 function getCardPositions(n: number, containerW: number): number[] {
   if (n === 0 || containerW === 0) return [];
   const usable = containerW - 2 * SIDE;
@@ -54,9 +43,9 @@ function getCardPositions(n: number, containerW: number): number[] {
 
 /**
  * Exibe as cartas do jogador em leque.
- * - Cartas distribuídas em arco, expandindo ao máximo o espaço disponível.
- * - Toque para selecionar/destacar; toque em "Jogar ↑" para jogar.
- * - Sem rolagem horizontal.
+ * - Toque para selecionar: carta expande em overlay de tela cheia.
+ * - Toque fora da carta para desselecionar.
+ * - Toque em "Jogar" no overlay para jogar.
  */
 export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,7 +64,6 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
     return () => ro.disconnect();
   }, []);
 
-  // Sync when parent cards change (card played or new cards dealt)
   useEffect(() => {
     setOrderedCards((prev) => {
       const map = new Map(cards.map((c) => [c.id, c]));
@@ -104,173 +92,186 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
 
   const n = orderedCards.length;
   const positions = getCardPositions(n, containerWidth);
+  const selectedCard = selectedCardId
+    ? orderedCards.find((c) => c.id === selectedCardId) ?? null
+    : null;
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        position: "relative",
-        width: "100%",
-        height: CONTAINER_H,
-        overflow: "visible",
-      }}
-    >
-      {orderedCards.map((card, i) => {
-        const isSelected = selectedCardId === card.id;
-        const isPlaying = playingCardId === card.id;
-        const isFinal = card.tipo === "Final";
-        const angle = getAngle(i, n);
-        const leftPos = positions[i] ?? 0;
-        const bgColor = CARD_TYPE_COLORS[card.tipo] ?? "#923c35";
-        const cardImageUrl = `/cards/${card.id}.png`;
-        const zIndex = isSelected ? n + 10 : isPlaying ? n + 5 : i;
-
-        return (
-          <motion.div
-            key={card.id}
-            onClick={() => handleCardTap(card)}
-            initial={{ rotate: angle, y: 20, opacity: 0, scale: 0.85 }}
-            animate={{
-              rotate: isSelected || isPlaying ? 0 : angle,
-              y: isPlaying ? -120 : isSelected ? -60 : 0,
-              opacity: isPlaying ? 0 : 1,
-              scale: isPlaying ? 0.8 : isSelected ? 1.08 : 1,
-              zIndex,
-            }}
-            transition={{ type: "spring", stiffness: 340, damping: 28 }}
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: leftPos,
-              width: CARD_W,
-              height: CARD_H,
-              borderRadius: 10,
-              background: bgColor,
-              border:
-                isSelected || isFinal
-                  ? "2px solid #c9a84c"
-                  : "1px solid rgba(255,255,255,0.2)",
-              boxShadow: isSelected
-                ? "0 0 20px 6px rgba(201,168,76,0.6), 0 8px 20px rgba(0,0,0,0.6)"
-                : isFinal
-                  ? "0 0 12px 4px rgba(201,168,76,0.5), 0 4px 8px rgba(0,0,0,0.4)"
-                  : "0 4px 10px rgba(0,0,0,0.35)",
-              cursor: "pointer",
-              userSelect: "none",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-              transformOrigin: "bottom center",
-            }}
-          >
-            {/* Card image */}
-            <img
-              src={cardImageUrl}
-              alt={card.texto_pt}
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-              draggable={false}
+    <>
+      {/* Full-screen overlay when a card is selected */}
+      <AnimatePresence>
+        {selectedCard && (
+          <>
+            {/* Backdrop — click to deselect */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setSelectedCardId(null)}
               style={{
-                position: "absolute",
+                position: "fixed",
                 inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                borderRadius: 10,
-                zIndex: 0,
+                background: "rgba(0,0,0,0.82)",
+                zIndex: 1000,
               }}
             />
-            {/* Gradient overlay */}
-            <div
+            {/* Expanded card */}
+            <motion.div
+              key="expanded-card"
+              initial={{ scale: 0.65, opacity: 0, x: "-50%", y: "-50%" }}
+              animate={{ scale: 1, opacity: 1, x: "-50%", y: "-50%" }}
+              exit={{ scale: 0.65, opacity: 0, x: "-50%", y: "-50%" }}
+              transition={{ type: "spring", stiffness: 320, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
               style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: 10,
-                background:
-                  "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.12) 60%)",
-                zIndex: 1,
-              }}
-            />
-            {/* Type badge */}
-            <span
-              style={{
-                position: "absolute",
-                top: 8,
-                fontSize: 11,
-                fontFamily: "var(--font-display), cursive",
-                color: "rgba(255,255,255,0.75)",
-                textTransform: "uppercase",
-                letterSpacing: 1,
-                zIndex: 2,
-              }}
-            >
-              {card.tipo}
-            </span>
-            {isFinal && (
-              <span style={{ position: "absolute", top: 26, fontSize: 18, zIndex: 2 }}>
-                ⭐
-              </span>
-            )}
-            {/* Card text */}
-            <span
-              style={{
-                position: "absolute",
-                bottom: isSelected ? 44 : 10,
-                left: 8,
-                right: 8,
-                fontSize: 11,
-                color: "#f5ebdc",
-                textAlign: "center",
-                lineHeight: 1.35,
+                position: "fixed",
+                top: "50%",
+                left: "50%",
+                zIndex: 1001,
+                width: "min(72vw, 340px)",
+                aspectRatio: `${CARD_W}/${CARD_H}`,
+                borderRadius: 16,
                 overflow: "hidden",
-                display: "-webkit-box",
-                WebkitLineClamp: 4,
-                WebkitBoxOrient: "vertical" as const,
-                zIndex: 2,
-                transition: "bottom 0.15s",
+                boxShadow:
+                  selectedCard.tipo === "Final"
+                    ? "0 0 32px rgba(201,168,76,0.7), 0 20px 48px rgba(0,0,0,0.85)"
+                    : "0 0 20px rgba(201,168,76,0.25), 0 20px 48px rgba(0,0,0,0.85)",
               }}
             >
-              {card.texto_pt}
-            </span>
-            {/* Play button — only when selected */}
-            <AnimatePresence>
-              {isSelected && (
-                <motion.button
-                  key="play-btn"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.15 }}
+              <img
+                src={`/cards/${selectedCard.id}.png`}
+                alt={selectedCard.texto_pt}
+                draggable={false}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                  userSelect: "none",
+                  pointerEvents: "none",
+                }}
+              />
+              {/* Play button */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: "32px 16px 14px",
+                  background:
+                    "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%)",
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <button
+                  type="button"
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handlePlay(card);
+                    handlePlay(selectedCard);
                   }}
                   style={{
-                    position: "absolute",
-                    bottom: 8,
-                    zIndex: 10,
-                    padding: "4px 14px",
-                    borderRadius: 6,
+                    padding: "9px 32px",
+                    borderRadius: 8,
                     background: "#c9a84c",
                     color: "#1a0e05",
                     fontWeight: 700,
-                    fontSize: 12,
+                    fontSize: 14,
                     border: "none",
                     cursor: "pointer",
                     fontFamily: "var(--font-title), serif",
                   }}
                 >
-                  Jogar ↑
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        );
-      })}
-    </div>
+                  Jogar
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Card fan */}
+      <div
+        ref={containerRef}
+        style={{
+          position: "relative",
+          width: "100%",
+          height: CONTAINER_H,
+          overflow: "visible",
+        }}
+      >
+        {orderedCards.map((card, i) => {
+          const isSelected = selectedCardId === card.id;
+          const isPlaying = playingCardId === card.id;
+          const isFinal = card.tipo === "Final";
+          const angle = getAngle(i, n);
+          const leftPos = positions[i] ?? 0;
+          const zIndex = isSelected ? n + 10 : isPlaying ? n + 5 : i;
+
+          return (
+            <motion.div
+              key={card.id}
+              onClick={() => handleCardTap(card)}
+              initial={{ rotate: angle, y: 20, opacity: 0, scale: 0.85 }}
+              animate={{
+                rotate: isPlaying ? 0 : angle,
+                y: isPlaying ? -120 : 0,
+                opacity: isPlaying ? 0 : 1,
+                scale: isPlaying ? 0.8 : isSelected ? 1.06 : 1,
+                zIndex,
+              }}
+              transition={{ type: "spring", stiffness: 340, damping: 28 }}
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: leftPos,
+                width: CARD_W,
+                height: CARD_H,
+                borderRadius: 10,
+                border: isFinal
+                  ? "2px solid #c9a84c"
+                  : isSelected
+                    ? "2px solid rgba(201,168,76,0.8)"
+                    : "1px solid rgba(255,255,255,0.2)",
+                boxShadow: isSelected
+                  ? "0 0 16px 4px rgba(201,168,76,0.5), 0 6px 16px rgba(0,0,0,0.5)"
+                  : isFinal
+                    ? "0 0 12px 4px rgba(201,168,76,0.5), 0 4px 8px rgba(0,0,0,0.4)"
+                    : "0 4px 10px rgba(0,0,0,0.35)",
+                cursor: "pointer",
+                userSelect: "none",
+                overflow: "hidden",
+                transformOrigin: "bottom center",
+              }}
+            >
+              <img
+                src={`/cards/${card.id}.png`}
+                alt={card.texto_pt}
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+                draggable={false}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: 10,
+                  userSelect: "none",
+                  pointerEvents: "none",
+                }}
+              />
+            </motion.div>
+          );
+        })}
+      </div>
+    </>
   );
 };
+
+

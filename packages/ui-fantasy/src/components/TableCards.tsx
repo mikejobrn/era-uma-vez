@@ -1,74 +1,103 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { type FC } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 import type { PlayedCard } from "@era-uma-vez/shared-types";
 
-const CARD_TYPE_COLORS: Record<string, string> = {
-  Evento: "#923c35",
-  Personagem: "#2c5f8a",
-  Lugar: "#3d7a4f",
-  Coisa: "#7a5c2e",
-  Aspecto: "#6b4a8a",
-  Final: "#c9a84c",
-};
+const CARD_W = 200;
+const CARD_H = 280;
+/** Minimum horizontal step between card left edges when stacking. */
+const MIN_STEP = 32;
+const NATURAL_STEP = CARD_W + 10;
 
-const CARD_W = 160;
-const CARD_H = 224;
+function StarIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="#c9a84c"
+      aria-hidden="true"
+      style={{ display: "block", filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))" }}
+    >
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+    </svg>
+  );
+}
 
 interface TableCardsProps {
   entries: PlayedCard[];
 }
 
 /**
- * Exibe as cartas jogadas lado a lado com wrap flexbox.
- * Sem autoria – apenas as cartas, em ordem de jogada.
+ * Exibe as cartas jogadas em uma única linha horizontal centralizada.
+ * Ordenadas da mais recente para a mais antiga.
+ * Quando transbordam, sobrepõem-se com a mais recente no topo.
  */
 export const TableCards: FC<TableCardsProps> = ({ entries }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerW, setContainerW] = useState(800);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      if (entry) setContainerW(entry.contentRect.width);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   if (entries.length === 0) return null;
+
+  // Reverse: newest first
+  const reversed = [...entries].reverse();
+  const n = reversed.length;
+
+  const step =
+    n <= 1
+      ? 0
+      : Math.max(MIN_STEP, Math.min(NATURAL_STEP, (containerW - CARD_W) / (n - 1)));
+  const totalW = n <= 1 ? CARD_W : (n - 1) * step + CARD_W;
+  const startX = Math.max(0, (containerW - totalW) / 2);
 
   return (
     <div
+      ref={containerRef}
       style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 8,
-        padding: 10,
-        borderRadius: 12,
-        background: "rgba(0,0,0,0.2)",
-        border: "1px solid rgba(201,168,76,0.15)",
+        position: "relative",
+        width: "100%",
+        height: CARD_H + 24,
+        flexShrink: 0,
       }}
     >
-      {entries.map((entry, index) => {
+      {reversed.map((entry, index) => {
         const isFinal = entry.card.tipo === "Final";
         const cardImageUrl = `/cards/${entry.card.id}.png`;
-        const bgColor = CARD_TYPE_COLORS[entry.card.tipo] ?? "#923c35";
+        const x = startX + index * step;
+        // Newest card (index 0) has the highest z-index
+        const zIndex = n - index;
 
         return (
           <motion.div
             key={`${entry.player_id}-${entry.played_at}-${index}`}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.82, y: -16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 280, damping: 24 }}
             style={{
+              position: "absolute",
+              left: x,
+              top: 12,
               width: CARD_W,
               height: CARD_H,
               borderRadius: 10,
-              background: bgColor,
-              border: isFinal
-                ? "2px solid #c9a84c"
-                : "1px solid rgba(255,255,255,0.2)",
-              boxShadow: isFinal
-                ? "0 0 12px rgba(201,168,76,0.6), 0 4px 12px rgba(0,0,0,0.5)"
-                : "0 4px 12px rgba(0,0,0,0.5)",
               overflow: "hidden",
-              flexShrink: 0,
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
+              zIndex,
+              boxShadow: isFinal
+                ? "0 0 18px rgba(201,168,76,0.7), 0 6px 18px rgba(0,0,0,0.6)"
+                : "0 4px 14px rgba(0,0,0,0.55)",
             }}
           >
-            {/* Card image */}
             <img
               src={cardImageUrl}
               alt={entry.card.texto_pt}
@@ -77,68 +106,25 @@ export const TableCards: FC<TableCardsProps> = ({ entries }) => {
               }}
               draggable={false}
               style={{
-                position: "absolute",
-                inset: 0,
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
-                pointerEvents: "none",
+                display: "block",
                 userSelect: "none",
+                pointerEvents: "none",
               }}
             />
-            {/* Top: type badge */}
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                padding: "6px 8px 16px",
-                background: "linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <span
+            {isFinal && (
+              <div
                 style={{
-                  fontSize: 10,
-                  fontFamily: "var(--font-display), cursive",
-                  color: "rgba(255,255,255,0.9)",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  lineHeight: 1,
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
                 }}
               >
-                {entry.card.tipo}
-              </span>
-              {isFinal && <span style={{ fontSize: 13 }}>⭐</span>}
-            </div>
-            {/* Bottom: card text */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                padding: "20px 10px 10px",
-                background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0) 100%)",
-              }}
-            >
-              <p
-                style={{
-                  color: "#f5ebdc",
-                  fontSize: 12,
-                  fontFamily: "var(--font-title), serif",
-                  textAlign: "center",
-                  lineHeight: 1.45,
-                  margin: 0,
-                  fontStyle: isFinal ? "italic" : "normal",
-                }}
-              >
-                {entry.card.texto_pt}
-              </p>
-            </div>
+                <StarIcon size={20} />
+              </div>
+            )}
           </motion.div>
         );
       })}

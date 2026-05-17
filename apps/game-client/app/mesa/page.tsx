@@ -14,6 +14,50 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "../../lib/supabase";
 
+// ── Inline SVG icons ────────────────────────────────────────────────────────
+
+function CrownIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+      <path d="M5 16L3 5l5.5 5L12 2l3.5 8L21 5l-2 11H5zm2 3h10v2H7v-2z" />
+    </svg>
+  );
+}
+
+function SkipIcon({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+      <path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z" />
+    </svg>
+  );
+}
+
+function UndoIcon({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+      <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62C8.77 11.22 10.54 10.5 12.5 10.5c3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z" />
+    </svg>
+  );
+}
+
+function SparkleIcon({ size = 15, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+      <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5zm6 10l.75 2.25L21 15l-2.25.75L18 18l-.75-2.25L15 15l2.25-.75zM5 18l.5 1.5L7 20l-1.5.5L5 22l-.5-1.5L3 20l1.5-.5z" />
+    </svg>
+  );
+}
+
+function TrophyIcon({ size = 40, color = "#c9a84c" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden="true" style={{ display: "block" }}>
+      <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0011 15.9V18H9v2h6v-2h-2v-2.1a5.01 5.01 0 003.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.86 10.4 5 9.3 5 8zm14 0c0 1.3-.86 2.4-2 2.82V7h2v1z" />
+    </svg>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 function generateRoomCode(): string {
   return Math.random().toString(36).substring(2, 7).toUpperCase();
 }
@@ -214,131 +258,265 @@ export default function MesaPage() {
   const canStartGame =
     room?.status === "lobby" && connectedPlayers.length >= 2 && !isStartingGame;
 
+  const isInProgress = room?.status === "in_progress";
+
+  // ── Shared top bar ──────────────────────────────────────────────────────────
+  const topBar = (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "8px 16px",
+        borderBottom: "1px solid rgba(201,168,76,0.2)",
+        flexShrink: 0,
+        flexWrap: "wrap",
+        background: "rgba(0,0,0,0.3)",
+      }}
+    >
+      {/* Title */}
+      <span
+        style={{
+          color: "var(--color-dourado)",
+          fontFamily: "var(--font-display), cursive",
+          fontSize: 20,
+          lineHeight: 1,
+          marginRight: 4,
+        }}
+      >
+        Era Uma Vez
+      </span>
+
+      {/* Room code */}
+      {roomCode && (
+        <span
+          style={{
+            color: "var(--color-dourado)",
+            fontFamily: "var(--font-title), serif",
+            fontSize: 13,
+            opacity: 0.85,
+            letterSpacing: 2,
+            border: "1px solid rgba(201,168,76,0.35)",
+            borderRadius: 6,
+            padding: "2px 8px",
+          }}
+        >
+          {roomCode}
+        </span>
+      )}
+
+      {/* Player count */}
+      {connectedPlayers.length > 0 && (
+        <span style={{ fontSize: 12, opacity: 0.6 }}>
+          {connectedPlayers.length} jogador{connectedPlayers.length !== 1 ? "es" : ""}
+        </span>
+      )}
+
+      {/* Narrator */}
+      {activeNarrator && (
+        <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: 4 }}>
+          <CrownIcon size={14} color="var(--color-dourado)" />
+          <span style={{ fontSize: 13, fontWeight: 600 }}>{activeNarrator.name}</span>
+        </div>
+      )}
+
+      {roomError && (
+        <span style={{ color: "#f87171", fontSize: 11 }}>{roomError}</span>
+      )}
+
+      {/* Spacer */}
+      <div style={{ flex: 1 }} />
+
+      {/* Start game button */}
+      {canStartGame && (
+        <button
+          type="button"
+          onClick={() => void handleStartGame()}
+          disabled={isStartingGame}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            padding: "6px 14px",
+            borderRadius: 8,
+            background: "var(--color-dourado)",
+            color: "var(--color-fundo)",
+            fontFamily: "var(--font-title), serif",
+            fontWeight: 700,
+            fontSize: 13,
+            border: "none",
+            cursor: "pointer",
+            opacity: isStartingGame ? 0.5 : 1,
+          }}
+        >
+          <SparkleIcon size={14} color="var(--color-fundo)" />
+          {isStartingGame ? "Iniciando…" : "Iniciar Partida"}
+        </button>
+      )}
+
+      {/* Advance turn */}
+      {isInProgress && (
+        <button
+          type="button"
+          onClick={() => void handleAdvanceTurn()}
+          disabled={!canAdvanceTurn || isAdvancingTurn}
+          title="Passar turno"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            padding: "6px 12px",
+            borderRadius: 8,
+            background: "var(--color-evento)",
+            color: "var(--color-pergaminho)",
+            fontFamily: "var(--font-title), serif",
+            fontWeight: 600,
+            fontSize: 12,
+            border: "none",
+            cursor: canAdvanceTurn ? "pointer" : "not-allowed",
+            opacity: !canAdvanceTurn || isAdvancingTurn ? 0.45 : 1,
+          }}
+        >
+          <SkipIcon size={14} color="var(--color-pergaminho)" />
+          {isAdvancingTurn ? "…" : "Turno"}
+        </button>
+      )}
+
+      {/* Undo */}
+      {isInProgress && storyLog.length > 0 && (
+        <button
+          type="button"
+          onClick={() => void handleUndo()}
+          title="Desfazer última jogada"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "6px 10px",
+            borderRadius: 8,
+            background: "rgba(120,80,30,0.35)",
+            color: "var(--color-dourado)",
+            border: "1px solid rgba(201,168,76,0.4)",
+            cursor: "pointer",
+          }}
+        >
+          <UndoIcon size={14} color="var(--color-dourado)" />
+        </button>
+      )}
+    </div>
+  );
+
+  // ── Victory screen ──────────────────────────────────────────────────────────
   if (winner) {
     return (
       <main
         style={{
           display: "flex",
-          flexDirection: "row",
+          flexDirection: "column",
           height: "100dvh",
           overflow: "hidden",
           background: "var(--color-fundo)",
         }}
       >
-        {/* Left panel */}
+        {topBar}
         <div
           style={{
-            width: 300,
-            flexShrink: 0,
+            flex: 1,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-            gap: 12,
-            borderRight: "1px solid rgba(201,168,76,0.2)",
+            overflowY: "auto",
+            padding: "20px 24px",
+            gap: 20,
           }}
         >
-          <p style={{ fontSize: 56 }}>🎉</p>
-          <h1
-            style={{
-              color: "var(--color-dourado)",
-              fontFamily: "var(--font-display), cursive",
-              fontSize: 28,
-              textAlign: "center",
-            }}
-          >
-            Fim da História!
-          </h1>
-          <p style={{ opacity: 0.8, textAlign: "center" }}>
-            <strong>{winner.player_name}</strong> encerrou com:
-          </p>
-          <p
-            style={{
-              color: "var(--color-dourado)",
-              textAlign: "center",
-              fontStyle: "italic",
-              fontSize: 14,
-            }}
-          >
-            &ldquo;{winner.card.texto_pt}&rdquo;
-          </p>
-          <p style={{ opacity: 0.5, fontSize: 12 }}>E viveram felizes para sempre.</p>
-        </div>
-        {/* Right panel — story cards */}
-        <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
+          <div style={{ textAlign: "center" }}>
+            <TrophyIcon size={48} />
+            <h1
+              style={{
+                color: "var(--color-dourado)",
+                fontFamily: "var(--font-display), cursive",
+                fontSize: 28,
+                margin: "8px 0 4px",
+              }}
+            >
+              Fim da História!
+            </h1>
+            <p style={{ opacity: 0.8, margin: "0 0 4px" }}>
+              <strong>{winner.player_name}</strong> encerrou com:
+            </p>
+            <p
+              style={{
+                color: "var(--color-dourado)",
+                fontStyle: "italic",
+                fontSize: 14,
+                margin: 0,
+              }}
+            >
+              &ldquo;{winner.card.texto_pt}&rdquo;
+            </p>
+            <p style={{ opacity: 0.5, fontSize: 12, margin: "8px 0 0" }}>
+              E viveram felizes para sempre.
+            </p>
+          </div>
           <TableCards entries={storyLog} />
         </div>
       </main>
     );
   }
 
-  const isInProgress = room?.status === "in_progress";
-
+  // ── Normal game screen ──────────────────────────────────────────────────────
   return (
     <main
       style={{
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
         height: "100dvh",
         overflow: "hidden",
         background: "var(--color-fundo)",
       }}
     >
-      {/* ── Left panel ──────────────────────────────────────── */}
+      {topBar}
+
+      {/* Content */}
       <div
         style={{
-          width: 260,
-          minWidth: 200,
-          flexShrink: 0,
+          flex: 1,
           display: "flex",
           flexDirection: "column",
-          padding: "12px 14px",
-          gap: 12,
-          borderRight: "1px solid rgba(201,168,76,0.2)",
           overflowY: "auto",
+          padding: "16px 20px",
+          gap: 16,
         }}
       >
-        <h1
-          style={{
-            color: "var(--color-dourado)",
-            fontFamily: "var(--font-display), cursive",
-            fontSize: 22,
-            margin: 0,
-          }}
-        >
-          Era Uma Vez
-        </h1>
-
         {/* Lobby: QR Code */}
-        {room?.status === "lobby" && roomCode && joinUrl && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-            <p style={{ opacity: 0.7, fontSize: 13, margin: 0 }}>
-              Sala:{" "}
-              <strong style={{ color: "var(--color-dourado)", fontSize: 18 }}>{roomCode}</strong>
-            </p>
+        {room?.status === "lobby" && joinUrl && (
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
+            }}
+          >
             <div
               style={{
-                padding: 10,
-                borderRadius: 10,
+                padding: 14,
+                borderRadius: 14,
                 background: "var(--color-pergaminho)",
               }}
             >
               <QRCodeSVG
                 value={joinUrl}
-                size={170}
+                size={200}
                 fgColor="var(--color-texto)"
                 bgColor="var(--color-pergaminho)"
               />
             </div>
-            <p style={{ fontSize: 11, opacity: 0.5, textAlign: "center", margin: 0 }}>
-              Aponte a câmera para entrar
+            <p style={{ fontSize: 12, opacity: 0.5, textAlign: "center", margin: 0 }}>
+              Aponte a câmera para entrar na sala
             </p>
-            {connectedPlayers.length > 0 && (
-              <p style={{ fontSize: 12, opacity: 0.7, margin: 0 }}>
-                {connectedPlayers.length} jogador{connectedPlayers.length !== 1 ? "es" : ""} conectado{connectedPlayers.length !== 1 ? "s" : ""}
-              </p>
-            )}
           </div>
         )}
 
@@ -346,158 +524,26 @@ export default function MesaPage() {
           <p style={{ opacity: 0.6, fontSize: 13 }}>Partida finalizada.</p>
         )}
 
-        {!room && <p style={{ opacity: 0.5, fontSize: 13 }}>Criando sala...</p>}
+        {!room && <p style={{ opacity: 0.5, fontSize: 13 }}>Criando sala…</p>}
 
-        {roomError && (
-          <p style={{ color: "#f87171", fontSize: 12 }}>{roomError}</p>
-        )}
-
-        {/* Start game button */}
-        {canStartGame && (
-          <button
-            type="button"
-            onClick={() => void handleStartGame()}
-            disabled={isStartingGame}
-            style={{
-              padding: "10px 16px",
-              borderRadius: 10,
-              background: "var(--color-dourado)",
-              color: "var(--color-fundo)",
-              fontFamily: "var(--font-title), serif",
-              fontWeight: 700,
-              fontSize: 15,
-              border: "none",
-              cursor: "pointer",
-              opacity: isStartingGame ? 0.5 : 1,
-            }}
-          >
-            {isStartingGame ? "Iniciando..." : "✨ Iniciar Partida"}
-          </button>
-        )}
-
-        {/* Narrator section */}
-        <div
-          style={{
-            borderRadius: 8,
-            background: "rgba(201,168,76,0.08)",
-            border: "1px solid rgba(201,168,76,0.25)",
-            padding: "8px 10px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 6,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
-            <span
-              style={{
-                color: "var(--color-dourado)",
-                fontFamily: "var(--font-title), serif",
-                fontSize: 11,
-                textTransform: "uppercase",
-                letterSpacing: 1,
-                opacity: 0.7,
-              }}
-            >
-              Narrador
-            </span>
-            <span style={{ fontSize: 13, fontWeight: 600, opacity: activeNarrator ? 1 : 0.4 }}>
-              {activeNarrator ? `👑 ${activeNarrator.name}` : "—"}
-            </span>
-          </div>
-
-          {/* Action buttons — compact row */}
-          {isInProgress && (
-            <div style={{ display: "flex", gap: 5 }}>
-              <button
-                type="button"
-                onClick={() => void handleAdvanceTurn()}
-                disabled={!canAdvanceTurn || isAdvancingTurn}
-                title="Passar turno"
-                style={{
-                  flex: 1,
-                  padding: "4px 6px",
-                  borderRadius: 6,
-                  background: "var(--color-evento)",
-                  color: "var(--color-pergaminho)",
-                  fontFamily: "var(--font-title), serif",
-                  fontWeight: 600,
-                  fontSize: 11,
-                  border: "none",
-                  cursor: canAdvanceTurn ? "pointer" : "not-allowed",
-                  opacity: !canAdvanceTurn || isAdvancingTurn ? 0.45 : 1,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {isAdvancingTurn ? "…" : "⏭ Turno"}
-              </button>
-
-              {storyLog.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => void handleUndo()}
-                  title="Desfazer última jogada"
-                  style={{
-                    padding: "4px 8px",
-                    borderRadius: 6,
-                    background: "rgba(120,80,30,0.35)",
-                    color: "var(--color-dourado)",
-                    fontFamily: "var(--font-title), serif",
-                    fontWeight: 600,
-                    fontSize: 11,
-                    border: "1px solid rgba(201,168,76,0.4)",
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  ↩
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Right panel: story log ───────────────────────────── */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          padding: "16px 20px",
-          gap: 12,
-          overflowY: "auto",
-        }}
-      >
+        {/* Story log */}
         {storyLog.length > 0 ? (
-          <>
-            <h2
+          <TableCards entries={storyLog} />
+        ) : (
+          isInProgress && (
+            <div
               style={{
-                color: "var(--color-dourado)",
-                fontFamily: "var(--font-title), serif",
-                fontSize: 14,
-                margin: 0,
-                opacity: 0.7,
-                textTransform: "uppercase",
-                letterSpacing: 1,
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              História — {storyLog.length} carta{storyLog.length !== 1 ? "s" : ""}
-            </h2>
-            <TableCards entries={storyLog} />
-          </>
-        ) : (
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <p style={{ opacity: 0.25, fontSize: 14, textAlign: "center" }}>
-              As cartas jogadas aparecerão aqui…
-            </p>
-          </div>
+              <p style={{ opacity: 0.25, fontSize: 14, textAlign: "center" }}>
+                As cartas jogadas aparecerão aqui…
+              </p>
+            </div>
+          )
         )}
       </div>
     </main>
