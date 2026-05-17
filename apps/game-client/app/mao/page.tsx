@@ -22,23 +22,6 @@ interface Session {
   roomCode: string;
 }
 
-function playSfx(type: "play" | "interrupt" | "victory") {
-  try {
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = type === "play" ? 440 : type === "interrupt" ? 330 : 880;
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.5);
-  } catch {
-    // Web Audio not available
-  }
-}
-
 function MaoContent() {
   const searchParams = useSearchParams();
   const salaCode = searchParams.get("sala");
@@ -110,7 +93,6 @@ function MaoContent() {
     const victory = checkVictory(typedRoom);
     if (victory) {
       setWinner(victory);
-      playSfx("victory");
     }
   }, [session?.playerId, session?.roomId]);
 
@@ -150,8 +132,6 @@ function MaoContent() {
 
     const client = supabase;
     const isInterrupt = canInterrupt(card) && !isCurrentNarrator;
-
-    playSfx(isInterrupt ? "interrupt" : "play");
 
     const entry: PlayedCard = {
       player_id: session.playerId,

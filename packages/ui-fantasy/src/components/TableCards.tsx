@@ -33,10 +33,16 @@ interface TableCardsProps {
  * Exibe as cartas jogadas em uma única linha horizontal centralizada.
  * Ordenadas da mais recente para a mais antiga.
  * Quando transbordam, sobrepõem-se com a mais recente no topo.
+ *
+ * Animações:
+ * - Nova carta (mais recente): slide-in de cima com bounce leve.
+ * - Cartas existentes que se deslocam: translate suave via layout animation.
  */
 export const TableCards: FC<TableCardsProps> = ({ entries }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerW, setContainerW] = useState(800);
+  // Tracks which entry keys have already been rendered (to distinguish new vs existing).
+  const seenKeysRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const el = containerRef.current;
@@ -72,6 +78,11 @@ export const TableCards: FC<TableCardsProps> = ({ entries }) => {
       }}
     >
       {reversed.map((entry, index) => {
+        const key = `${entry.player_id}-${entry.played_at}`;
+        const isNew = !seenKeysRef.current.has(key);
+        // Register key immediately so next render doesn't treat this as new.
+        seenKeysRef.current.add(key);
+
         const isFinal = entry.card.tipo === "Final";
         const cardImageUrl = `/cards/${entry.card.id}.png`;
         const x = startX + index * step;
@@ -80,10 +91,20 @@ export const TableCards: FC<TableCardsProps> = ({ entries }) => {
 
         return (
           <motion.div
-            key={`${entry.player_id}-${entry.played_at}-${index}`}
-            initial={{ opacity: 0, scale: 0.82, y: -16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 280, damping: 24 }}
+            key={key}
+            // layout animates position changes for existing cards (translate with bounce)
+            layout
+            // New cards slide in from above; existing cards skip entrance animation
+            initial={isNew ? { opacity: 0, y: -60, scale: 0.82 } : false}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{
+              // Entrance animation for new cards
+              type: "spring",
+              stiffness: 260,
+              damping: 20,
+              // Layout (translate) animation for repositioned cards
+              layout: { type: "spring", stiffness: 300, damping: 28 },
+            }}
             style={{
               position: "absolute",
               left: x,
