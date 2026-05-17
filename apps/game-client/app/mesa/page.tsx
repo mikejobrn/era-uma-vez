@@ -144,12 +144,19 @@ export default function MesaPage() {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "UPDATE",
           schema: "public",
           table: "rooms",
           filter: `id=eq.${room.id}`,
         },
-        fetchRoom,
+        (payload) => {
+          // Use the payload directly to avoid an extra DB round-trip.
+          if (payload.new && Object.keys(payload.new).length > 0) {
+            setRoom(payload.new as RoomFull);
+          } else {
+            fetchRoom();
+          }
+        },
       )
       .subscribe();
 
@@ -528,7 +535,17 @@ export default function MesaPage() {
 
         {/* Story log */}
         {storyLog.length > 0 ? (
-          <TableCards entries={storyLog} />
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+            }}
+          >
+            <TableCards entries={storyLog} />
+          </div>
         ) : (
           isInProgress && (
             <div

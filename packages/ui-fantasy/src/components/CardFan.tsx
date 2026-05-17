@@ -46,6 +46,8 @@ function getCardPositions(n: number, containerW: number): number[] {
  * - Toque para selecionar: carta expande em overlay de tela cheia.
  * - Toque fora da carta para desselecionar.
  * - Toque em "Jogar" no overlay para jogar.
+ * - Deslize para cima para jogar diretamente com animação de slide.
+ * - Arraste horizontalmente para reordenar as cartas.
  */
 export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -82,10 +84,28 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
     if (!onPlay || playingCardId) return;
     setPlayingCardId(card.id);
     setSelectedCardId(null);
+    // Start the DB write immediately for better performance;
+    // the card stays visible during the 350 ms exit animation.
+    onPlay(card);
     setTimeout(() => {
       setPlayingCardId(null);
-      onPlay(card);
-    }, 300);
+    }, 350);
+  }
+
+  function handleReorder(fromIndex: number, offsetX: number, positions: number[]) {
+    if (positions.length < 2) return;
+    const step = positions[1]! - positions[0]!;
+    if (step <= 0) return;
+    const shift = Math.round(offsetX / step);
+    if (shift === 0) return;
+    const toIndex = Math.max(0, Math.min(orderedCards.length - 1, fromIndex + shift));
+    if (toIndex === fromIndex) return;
+    setOrderedCards((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved!);
+      return next;
+    });
   }
 
   if (orderedCards.length === 0) return null;
@@ -213,20 +233,51 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
           const angle = getAngle(i, n);
           const leftPos = positions[i] ?? 0;
           const zIndex = isSelected ? n + 10 : isPlaying ? n + 5 : i;
+          // Disable drag while card is selected (overlay visible) or already playing.
+          const canDrag = !isSelected && !isPlaying && !selectedCardId;
 
           return (
             <motion.div
               key={card.id}
-              onClick={() => handleCardTap(card)}
+              layout
+              onClick={() => !isPlaying && handleCardTap(card)}
               initial={{ rotate: angle, y: 20, opacity: 0, scale: 0.85 }}
               animate={{
                 rotate: isPlaying ? 0 : angle,
-                y: isPlaying ? -120 : 0,
+                y: isPlaying ? -240 : 0,
                 opacity: isPlaying ? 0 : 1,
-                scale: isPlaying ? 0.8 : isSelected ? 1.06 : 1,
+                scale: isPlaying ? 0.75 : isSelected ? 1.06 : 1,
                 zIndex,
               }}
-              transition={{ type: "spring", stiffness: 340, damping: 28 }}
+              transition={{
+                type: "spring",
+                stiffness: 340,
+                damping: 28,
+                layout: { type: "spring", stiffness: 320, damping: 30 },
+              }}
+              // Drag: up to play, horizontal to reorder
+              drag={canDrag}
+              dragDirectionLock={true}
+              dragConstraints={{
+                top: -CARD_H * 1.5,
+                bottom: 20,
+                left: -600,
+                right: 600,
+              }}
+              dragElastic={{ top: 0.55, bottom: 0.08, left: 0.25, right: 0.25 }}
+              dragMomentum={false}
+              onDragEnd={(_, info) => {
+                const { x: offsetX, y: offsetY } = info.offset;
+                // Swipe up to play: dominant upward movement
+                if (offsetY < -80 && Math.abs(offsetY) >= Math.abs(offsetX) * 0.8) {
+                  handlePlay(card);
+                  return;
+                }
+                // Horizontal drag to reorder
+                if (Math.abs(offsetX) >= 40) {
+                  handleReorder(i, offsetX, positions);
+                }
+              }}
               style={{
                 position: "absolute",
                 bottom: 0,
@@ -244,7 +295,7 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
                   : isFinal
                     ? "0 0 12px 4px rgba(201,168,76,0.5), 0 4px 8px rgba(0,0,0,0.4)"
                     : "0 4px 10px rgba(0,0,0,0.35)",
-                cursor: "pointer",
+                cursor: canDrag ? "grab" : "pointer",
                 userSelect: "none",
                 overflow: "hidden",
                 transformOrigin: "bottom center",
