@@ -365,7 +365,7 @@ function MaoContent() {
           )}
         </div>
 
-        {/* Card fan at bottom */}
+        {/* Card strip at bottom */}
         {isInProgress && hasHand && (
           <div
             className="w-full"
@@ -374,9 +374,12 @@ function MaoContent() {
               paddingTop: 8,
               borderTop: "1px solid rgba(201,168,76,0.15)",
               background: "rgba(0,0,0,0.3)",
+              overflowY: "visible",
             }}
           >
-            <p className="text-center text-xs opacity-40 mb-2">Deslize ↑ para jogar</p>
+            <p className="text-center text-xs opacity-40 mb-2">
+              Toque para selecionar • Arraste para reordenar
+            </p>
             <CardFan
               cards={hand}
               onPlay={(card) => void handlePlayCard(card)}

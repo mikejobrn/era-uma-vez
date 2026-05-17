@@ -19,4 +19,5 @@ export const fonts = {
 export { CardFan } from "./components/CardFan";
 export { EndingCard } from "./components/EndingCard";
 export { StoryLog } from "./components/StoryLog";
+export { TableCards } from "./components/TableCards";
 export { PlayerAvatar } from "./components/PlayerAvatar";
