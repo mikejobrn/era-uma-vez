@@ -39,6 +39,11 @@
   --font-display: "PirataOne", cursive;
 }
 
+html,
+body {
+  overscroll-behavior: none;
+}
+
 body {
   background: var(--color-fundo);
   color: var(--color-pergaminho);
