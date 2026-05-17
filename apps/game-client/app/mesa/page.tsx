@@ -8,7 +8,7 @@ import {
   getNextNarrator,
   undoLastMove,
 } from "@era-uma-vez/game-logic";
-import { StoryLog } from "@era-uma-vez/ui-fantasy";
+import { TableCards } from "@era-uma-vez/ui-fantasy";
 import type { Card, PlayedCard, Player, Room } from "@era-uma-vez/shared-types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
@@ -236,7 +236,9 @@ export default function MesaPage() {
           </p>
           <p className="mt-6 opacity-60 text-sm">E viveram felizes para sempre.</p>
         </div>
-        <StoryLog entries={storyLog} />
+        <div className="w-full max-w-4xl">
+          <TableCards entries={storyLog} />
+        </div>
       </main>
     );
   }
@@ -333,18 +335,36 @@ export default function MesaPage() {
       </section>
 
       {storyLog.length > 0 && (
-        <section className="w-full max-w-lg">
-          <h2
-            className="text-xl font-semibold mb-3 text-center"
-            style={{ color: "var(--color-dourado)" }}
+        <section className="w-full max-w-4xl">
+          <div
+            className="flex items-center justify-between mb-3"
           >
-            História
-          </h2>
-          <StoryLog
-            entries={storyLog}
-            descending
-            onUndo={room?.status === "in_progress" ? () => void handleUndo() : undefined}
-          />
+            <h2
+              className="text-xl font-semibold"
+              style={{ color: "var(--color-dourado)" }}
+            >
+              História ({storyLog.length})
+            </h2>
+            {room?.status === "in_progress" && (
+              <button
+                type="button"
+                onClick={() => void handleUndo()}
+                style={{
+                  padding: "6px 16px",
+                  borderRadius: 8,
+                  background: "transparent",
+                  border: "1px solid rgba(245,235,220,0.3)",
+                  color: "rgba(245,235,220,0.6)",
+                  fontSize: 12,
+                  cursor: "pointer",
+                  fontFamily: "var(--font-title), serif",
+                }}
+              >
+                ↩ Desfazer
+              </button>
+            )}
+          </div>
+          <TableCards entries={storyLog} />
         </section>
       )}
 
