@@ -153,42 +153,44 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
                   pointerEvents: "none",
                 }}
               />
-              {/* Play button */}
-              <div
+            </motion.div>
+            {/* Play button below the expanded card */}
+            <motion.div
+              key="expanded-card-play-button"
+              initial={{ opacity: 0, y: 10, x: "-50%" }}
+              animate={{ opacity: 1, y: 0, x: "-50%" }}
+              exit={{ opacity: 0, y: 10, x: "-50%" }}
+              transition={{ duration: 0.18 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: "fixed",
+                top: "calc(50% + min(72vw, 340px) * 0.7 + 18px)",
+                left: "50%",
+                zIndex: 1002,
+              }}
+            >
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePlay(selectedCard);
+                }}
                 style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  padding: "32px 16px 14px",
-                  background:
-                    "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%)",
-                  display: "flex",
-                  justifyContent: "center",
+                  padding: "10px 34px",
+                  borderRadius: 8,
+                  background: "#c9a84c",
+                  color: "#1a0e05",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-title), serif",
+                  boxShadow: "0 8px 20px rgba(0,0,0,0.45)",
                 }}
               >
-                <button
-                  type="button"
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePlay(selectedCard);
-                  }}
-                  style={{
-                    padding: "9px 32px",
-                    borderRadius: 8,
-                    background: "#c9a84c",
-                    color: "#1a0e05",
-                    fontWeight: 700,
-                    fontSize: 14,
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "var(--font-title), serif",
-                  }}
-                >
-                  Jogar
-                </button>
-              </div>
+                Jogar
+              </button>
             </motion.div>
           </>
         )}
@@ -273,5 +275,4 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
     </>
   );
 };
-
 
