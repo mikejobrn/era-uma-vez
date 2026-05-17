@@ -216,159 +216,300 @@ export default function MesaPage() {
 
   if (winner) {
     return (
-      <main className="flex flex-col items-center justify-center min-h-screen gap-8 p-8">
-        <div className="text-center">
-          <p style={{ fontSize: 64 }}>🎉</p>
+      <main
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          height: "100dvh",
+          overflow: "hidden",
+          background: "var(--color-fundo)",
+        }}
+      >
+        {/* Left panel */}
+        <div
+          style={{
+            width: 300,
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+            gap: 12,
+            borderRight: "1px solid rgba(201,168,76,0.2)",
+          }}
+        >
+          <p style={{ fontSize: 56 }}>🎉</p>
           <h1
-            className="text-4xl font-bold"
-            style={{ color: "var(--color-dourado)", fontFamily: "var(--font-display), cursive" }}
+            style={{
+              color: "var(--color-dourado)",
+              fontFamily: "var(--font-display), cursive",
+              fontSize: 28,
+              textAlign: "center",
+            }}
           >
             Fim da História!
           </h1>
-          <p className="mt-4 text-xl opacity-80">
-            <strong>{winner.player_name}</strong> encerrou a história com:
+          <p style={{ opacity: 0.8, textAlign: "center" }}>
+            <strong>{winner.player_name}</strong> encerrou com:
           </p>
           <p
-            className="mt-2 text-lg max-w-sm mx-auto"
-            style={{ color: "var(--color-dourado)" }}
+            style={{
+              color: "var(--color-dourado)",
+              textAlign: "center",
+              fontStyle: "italic",
+              fontSize: 14,
+            }}
           >
             &ldquo;{winner.card.texto_pt}&rdquo;
           </p>
-          <p className="mt-6 opacity-60 text-sm">E viveram felizes para sempre.</p>
+          <p style={{ opacity: 0.5, fontSize: 12 }}>E viveram felizes para sempre.</p>
         </div>
-        <div className="w-full max-w-4xl">
+        {/* Right panel — story cards */}
+        <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
           <TableCards entries={storyLog} />
         </div>
       </main>
     );
   }
 
+  const isInProgress = room?.status === "in_progress";
+
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-8 p-8">
-      <h1
-        className="text-4xl font-bold text-center"
-        style={{ color: "var(--color-dourado)", fontFamily: "var(--font-display), cursive" }}
+    <main
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        height: "100dvh",
+        overflow: "hidden",
+        background: "var(--color-fundo)",
+      }}
+    >
+      {/* ── Left panel ──────────────────────────────────────── */}
+      <div
+        style={{
+          width: 300,
+          minWidth: 240,
+          flexShrink: 0,
+          display: "flex",
+          flexDirection: "column",
+          padding: "16px 20px",
+          gap: 16,
+          borderRight: "1px solid rgba(201,168,76,0.2)",
+          overflowY: "auto",
+        }}
       >
-        Era Uma Vez — Mesa
-      </h1>
-
-      {room?.status === "lobby" && roomCode && joinUrl ? (
-        <div className="flex flex-col items-center gap-6">
-          <p className="text-xl opacity-80">
-            Sala:{" "}
-            <span className="font-bold text-2xl" style={{ color: "var(--color-dourado)" }}>
-              {roomCode}
-            </span>
-          </p>
-          <div className="p-4 rounded-xl" style={{ background: "var(--color-pergaminho)" }}>
-            <QRCodeSVG
-              value={joinUrl}
-              size={220}
-              fgColor="var(--color-texto)"
-              bgColor="var(--color-pergaminho)"
-            />
-          </div>
-          <p className="text-sm opacity-60 text-center max-w-xs">
-            Aponte a câmera do celular para o QR Code para entrar na partida.
-          </p>
-        </div>
-      ) : room?.status === "in_progress" ? (
-        <p className="opacity-70 text-center max-w-sm">
-          Partida em andamento. Entradas foram encerradas.
-        </p>
-      ) : room?.status === "finished" ? (
-        <p className="opacity-70 text-center max-w-sm">
-          Partida finalizada.
-        </p>
-      ) : (
-        <p className="opacity-60">Criando sala...</p>
-      )}
-
-      {roomError ? <p className="text-sm text-red-300 text-center">{roomError}</p> : null}
-
-      {canStartGame && (
-        <button
-          type="button"
-          onClick={() => void handleStartGame()}
-          disabled={isStartingGame}
-          className="rounded-lg px-6 py-3 font-semibold text-lg transition-opacity disabled:opacity-40"
+        <h1
           style={{
-            background: "var(--color-dourado)",
-            color: "var(--color-fundo)",
-            fontFamily: "var(--font-title), serif",
+            color: "var(--color-dourado)",
+            fontFamily: "var(--font-display), cursive",
+            fontSize: 22,
+            margin: 0,
           }}
         >
-          {isStartingGame ? "Iniciando..." : "✨ Iniciar Partida"}
-        </button>
-      )}
+          Era Uma Vez
+        </h1>
 
-      <section className="flex flex-col items-center gap-3 text-center">
-        <h2 className="text-xl font-semibold" style={{ color: "var(--color-dourado)" }}>
-          Narrador ativo
-        </h2>
-        <p className="opacity-80">
-          {activeNarrator ? (
-            <>
-              👑 <strong>{activeNarrator.name}</strong> conduz a história agora.
-            </>
-          ) : (
-            "Aguardando jogadores para escolher o narrador."
-          )}
-        </p>
-        {room?.status === "in_progress" && (
-          <button
-            type="button"
-            onClick={() => void handleAdvanceTurn()}
-            disabled={!canAdvanceTurn || isAdvancingTurn}
-            className="rounded-lg px-4 py-2 font-semibold transition-opacity disabled:opacity-40"
-            style={{
-              background: "var(--color-evento)",
-              color: "var(--color-pergaminho)",
-            }}
-          >
-            {isAdvancingTurn ? "Passando turno..." : "Passar turno"}
-          </button>
-        )}
-        {!canAdvanceTurn && connectedPlayers.length === 1 ? (
-          <p className="text-sm opacity-60">É preciso mais de um jogador conectado para rotacionar.</p>
-        ) : null}
-      </section>
-
-      {storyLog.length > 0 && (
-        <section className="w-full max-w-4xl">
-          <div
-            className="flex items-center justify-between mb-3"
-          >
-            <h2
-              className="text-xl font-semibold"
-              style={{ color: "var(--color-dourado)" }}
+        {/* Lobby: QR Code */}
+        {room?.status === "lobby" && roomCode && joinUrl && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+            <p style={{ opacity: 0.7, fontSize: 13, margin: 0 }}>
+              Sala:{" "}
+              <strong style={{ color: "var(--color-dourado)", fontSize: 18 }}>{roomCode}</strong>
+            </p>
+            <div
+              style={{
+                padding: 10,
+                borderRadius: 10,
+                background: "var(--color-pergaminho)",
+              }}
             >
-              História ({storyLog.length})
-            </h2>
-            {room?.status === "in_progress" && (
-              <button
-                type="button"
-                onClick={() => void handleUndo()}
-                style={{
-                  padding: "6px 16px",
-                  borderRadius: 8,
-                  background: "transparent",
-                  border: "1px solid rgba(245,235,220,0.3)",
-                  color: "rgba(245,235,220,0.6)",
-                  fontSize: 12,
-                  cursor: "pointer",
-                  fontFamily: "var(--font-title), serif",
-                }}
-              >
-                ↩ Desfazer
-              </button>
+              <QRCodeSVG
+                value={joinUrl}
+                size={170}
+                fgColor="var(--color-texto)"
+                bgColor="var(--color-pergaminho)"
+              />
+            </div>
+            <p style={{ fontSize: 11, opacity: 0.5, textAlign: "center", margin: 0 }}>
+              Aponte a câmera para entrar
+            </p>
+            {connectedPlayers.length > 0 && (
+              <p style={{ fontSize: 12, opacity: 0.7, margin: 0 }}>
+                {connectedPlayers.length} jogador{connectedPlayers.length !== 1 ? "es" : ""} conectado{connectedPlayers.length !== 1 ? "s" : ""}
+              </p>
             )}
           </div>
-          <TableCards entries={storyLog} />
-        </section>
-      )}
+        )}
 
-      <PlayerCircle players={players} />
+        {room?.status === "finished" && (
+          <p style={{ opacity: 0.6, fontSize: 13 }}>Partida finalizada.</p>
+        )}
+
+        {!room && <p style={{ opacity: 0.5, fontSize: 13 }}>Criando sala...</p>}
+
+        {roomError && (
+          <p style={{ color: "#f87171", fontSize: 12 }}>{roomError}</p>
+        )}
+
+        {/* Start game button */}
+        {canStartGame && (
+          <button
+            type="button"
+            onClick={() => void handleStartGame()}
+            disabled={isStartingGame}
+            style={{
+              padding: "10px 16px",
+              borderRadius: 10,
+              background: "var(--color-dourado)",
+              color: "var(--color-fundo)",
+              fontFamily: "var(--font-title), serif",
+              fontWeight: 700,
+              fontSize: 15,
+              border: "none",
+              cursor: "pointer",
+              opacity: isStartingGame ? 0.5 : 1,
+            }}
+          >
+            {isStartingGame ? "Iniciando..." : "✨ Iniciar Partida"}
+          </button>
+        )}
+
+        {/* Narrator section */}
+        <div
+          style={{
+            borderRadius: 10,
+            background: "rgba(201,168,76,0.08)",
+            border: "1px solid rgba(201,168,76,0.25)",
+            padding: "12px 14px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          <h2
+            style={{
+              color: "var(--color-dourado)",
+              fontFamily: "var(--font-title), serif",
+              fontSize: 13,
+              margin: 0,
+              textTransform: "uppercase",
+              letterSpacing: 1,
+              opacity: 0.8,
+            }}
+          >
+            Narrador
+          </h2>
+          <p style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>
+            {activeNarrator ? (
+              <>👑 {activeNarrator.name}</>
+            ) : (
+              <span style={{ opacity: 0.5, fontWeight: 400, fontSize: 13 }}>
+                Aguardando jogadores…
+              </span>
+            )}
+          </p>
+
+          {/* Action buttons */}
+          {isInProgress && (
+            <div style={{ display: "flex", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => void handleAdvanceTurn()}
+                disabled={!canAdvanceTurn || isAdvancingTurn}
+                style={{
+                  flex: 1,
+                  padding: "7px 10px",
+                  borderRadius: 8,
+                  background: "var(--color-evento)",
+                  color: "var(--color-pergaminho)",
+                  fontFamily: "var(--font-title), serif",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  border: "none",
+                  cursor: canAdvanceTurn ? "pointer" : "not-allowed",
+                  opacity: !canAdvanceTurn || isAdvancingTurn ? 0.45 : 1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {isAdvancingTurn ? "Passando…" : "⏭ Passar turno"}
+              </button>
+
+              {storyLog.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => void handleUndo()}
+                  style={{
+                    flex: 1,
+                    padding: "7px 10px",
+                    borderRadius: 8,
+                    background: "rgba(120,80,30,0.35)",
+                    color: "var(--color-dourado)",
+                    fontFamily: "var(--font-title), serif",
+                    fontWeight: 600,
+                    fontSize: 13,
+                    border: "1px solid rgba(201,168,76,0.4)",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  ↩ Desfazer
+                </button>
+              )}
+            </div>
+          )}
+
+          {!canAdvanceTurn && connectedPlayers.length === 1 && isInProgress && (
+            <p style={{ fontSize: 11, opacity: 0.5, margin: 0 }}>
+              Precisa de mais de um jogador para rotacionar.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* ── Right panel: story log ───────────────────────────── */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          padding: "16px 20px",
+          gap: 12,
+          overflowY: "auto",
+        }}
+      >
+        {storyLog.length > 0 ? (
+          <>
+            <h2
+              style={{
+                color: "var(--color-dourado)",
+                fontFamily: "var(--font-title), serif",
+                fontSize: 14,
+                margin: 0,
+                opacity: 0.7,
+                textTransform: "uppercase",
+                letterSpacing: 1,
+              }}
+            >
+              História — {storyLog.length} carta{storyLog.length !== 1 ? "s" : ""}
+            </h2>
+            <TableCards entries={storyLog} />
+          </>
+        ) : (
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <p style={{ opacity: 0.25, fontSize: 14, textAlign: "center" }}>
+              As cartas jogadas aparecerão aqui…
+            </p>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
@@ -382,50 +523,6 @@ function formatRoomCreateError(error: { message?: string; code?: string; details
   const base =
     "Não foi possível criar a sala. Verifique se as migrations do Supabase foram executadas (rooms/players/policies).";
   return suffix ? `${base} (${suffix})` : base;
-}
-
-function PlayerCircle({ players }: { players: Player[] }) {
-  if (players.length === 0) {
-    return <p className="opacity-40 text-sm mt-4">Aguardando jogadores...</p>;
-  }
-
-  const radius = 120;
-  const containerSize = radius * 2 + 80;
-
-  return (
-    <div className="relative mt-4" style={{ width: containerSize, height: containerSize }}>
-      {players.map((player, index) => {
-        const angle = (index / players.length) * 2 * Math.PI - Math.PI / 2;
-        const x = containerSize / 2 + radius * Math.cos(angle);
-        const y = containerSize / 2 + radius * Math.sin(angle);
-        return (
-          <div
-            key={player.id}
-            className="absolute flex flex-col items-center"
-            style={{ left: x, top: y, transform: "translate(-50%, -50%)" }}
-          >
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold"
-              style={{
-                background: "var(--color-evento)",
-                color: "var(--color-pergaminho)",
-                border: player.is_narrator ? "3px solid var(--color-dourado)" : "none",
-              }}
-            >
-              {player.name.charAt(0).toUpperCase()}
-            </div>
-            <span
-              className="text-xs mt-1 text-center max-w-16 truncate"
-              style={{ color: "var(--color-pergaminho)" }}
-            >
-              {player.is_narrator ? "👑 " : ""}
-              {player.name}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 async function persistNarratorTurn(

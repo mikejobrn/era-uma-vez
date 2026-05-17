@@ -55,6 +55,7 @@ function MaoContent() {
   const [roomNarratorId, setRoomNarratorId] = useState<string | null>(null);
   const [winner, setWinner] = useState<PlayedCard | null>(null);
   const [isPlayingCard, setIsPlayingCard] = useState(false);
+  const [otherPlayers, setOtherPlayers] = useState<Pick<Player, "id" | "name" | "hand">[]>([]);
 
   useEffect(() => {
     if (!salaCode) return;
@@ -94,6 +95,13 @@ function MaoContent() {
     setRoomStatus(typedRoom.status);
     setStoryLog(typedRoom.story_log ?? []);
     setRoomNarratorId(typedRoom.narrator_id);
+
+    // Store other players (everyone except self)
+    setOtherPlayers(
+      typedPlayers
+        .filter((p) => p.id !== session.playerId)
+        .map((p) => ({ id: p.id, name: p.name, hand: p.hand })),
+    );
 
     if (playerData) {
       setHand((playerData as { hand: Card[] }).hand ?? []);
@@ -255,8 +263,18 @@ function MaoContent() {
 
   if (!salaCode) {
     return (
-      <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-        <p className="opacity-60 text-center">
+      <main
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100dvh",
+          overflow: "hidden",
+          padding: 32,
+        }}
+      >
+        <p style={{ opacity: 0.6, textAlign: "center" }}>
           Nenhuma sala encontrada. Escaneie o QR Code da Mesa para entrar.
         </p>
       </main>
@@ -265,21 +283,38 @@ function MaoContent() {
 
   if (winner) {
     return (
-      <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8 text-center">
+      <main
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100dvh",
+          overflow: "hidden",
+          padding: 32,
+          textAlign: "center",
+        }}
+      >
         <p style={{ fontSize: 56 }}>🎉</p>
         <h2
-          className="text-3xl font-bold"
-          style={{ color: "var(--color-dourado)", fontFamily: "var(--font-display), cursive" }}
+          style={{
+            color: "var(--color-dourado)",
+            fontFamily: "var(--font-display), cursive",
+            fontSize: 28,
+            margin: "8px 0",
+          }}
         >
           Fim da História!
         </h2>
-        <p className="opacity-80">
+        <p style={{ opacity: 0.8 }}>
           <strong>{winner.player_name}</strong> encerrou com:
         </p>
-        <p style={{ color: "var(--color-dourado)" }}>
+        <p style={{ color: "var(--color-dourado)", margin: "8px 0" }}>
           &ldquo;{winner.card.texto_pt}&rdquo;
         </p>
-        <p className="opacity-60 text-sm mt-4">E viveram felizes para sempre.</p>
+        <p style={{ opacity: 0.5, fontSize: 13, marginTop: 16 }}>
+          E viveram felizes para sempre.
+        </p>
       </main>
     );
   }
@@ -290,44 +325,112 @@ function MaoContent() {
 
     return (
       <main
-        className="flex flex-col min-h-screen"
-        style={{ background: "var(--color-fundo)" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100dvh",
+          overflow: "hidden",
+          background: "var(--color-fundo)",
+        }}
       >
-        {/* Header */}
+        {/* ── Header ── */}
         <div
-          className="flex items-center justify-between px-4 py-3"
-          style={{ borderBottom: "1px solid rgba(201,168,76,0.2)" }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 14px",
+            borderBottom: "1px solid rgba(201,168,76,0.2)",
+            flexShrink: 0,
+          }}
         >
-          <div>
-            <p className="text-sm opacity-60">Sala {salaCode}</p>
-            <p
-              className="font-bold"
-              style={{ color: "var(--color-dourado)", fontFamily: "var(--font-display), cursive" }}
-            >
-              {session.playerName}
+          <p
+            style={{
+              fontFamily: "var(--font-display), cursive",
+              color: "var(--color-dourado)",
+              fontWeight: 700,
+              fontSize: 16,
+              margin: 0,
+            }}
+          >
+            {session.playerName}
+          </p>
+          {activeNarratorName && (
+            <p style={{ fontSize: 13, opacity: 0.8, margin: 0 }}>
+              👑 {activeNarratorName}
             </p>
-          </div>
-          <div className="text-right">
-            {activeNarratorName && (
-              <p className="text-sm opacity-80">
-                👑 {activeNarratorName}
-              </p>
-            )}
-            <p className="text-xs opacity-50">{roomStatus ?? "lobby"}</p>
-          </div>
+          )}
         </div>
 
-        {/* Main content */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 p-4">
-          {!isInProgress && (
-            <div className="text-center">
-              <h2
-                className="text-2xl font-bold mb-2"
-                style={{ color: "var(--color-dourado)", fontFamily: "var(--font-display), cursive" }}
+        {/* ── Other players strip ── */}
+        {otherPlayers.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 8,
+              padding: "6px 14px",
+              borderBottom: "1px solid rgba(201,168,76,0.1)",
+              flexShrink: 0,
+              overflowX: "auto",
+            }}
+          >
+            {otherPlayers.map((p) => (
+              <div
+                key={p.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  padding: "3px 8px",
+                  borderRadius: 20,
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                }}
               >
-                Aguardando...
+                <span style={{ fontSize: 12, opacity: 0.8 }}>{p.name}</span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "var(--color-dourado)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {p.hand?.length ?? 0} 🃏
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── Middle: status messages ── */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "8px 16px",
+            gap: 10,
+            minHeight: 0,
+          }}
+        >
+          {!isInProgress && (
+            <div style={{ textAlign: "center" }}>
+              <h2
+                style={{
+                  color: "var(--color-dourado)",
+                  fontFamily: "var(--font-display), cursive",
+                  fontSize: 22,
+                  margin: "0 0 6px",
+                }}
+              >
+                Aguardando…
               </h2>
-              <p className="opacity-70 text-sm">
+              <p style={{ opacity: 0.6, fontSize: 13, margin: 0 }}>
                 Aguarde o início da partida na Mesa.
               </p>
             </div>
@@ -335,17 +438,31 @@ function MaoContent() {
 
           {isInProgress && isCurrentNarrator && (
             <div
-              className="rounded-lg px-4 py-2 text-center"
-              style={{ background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.4)" }}
+              style={{
+                padding: "10px 16px",
+                borderRadius: 10,
+                background: "rgba(201,168,76,0.12)",
+                border: "1px solid rgba(201,168,76,0.4)",
+                textAlign: "center",
+              }}
             >
-              <p style={{ color: "var(--color-dourado)" }} className="font-semibold text-sm">
+              <p style={{ color: "var(--color-dourado)", fontWeight: 600, fontSize: 14, margin: "0 0 8px" }}>
                 👑 É a sua vez de narrar!
               </p>
               <button
                 type="button"
                 onClick={() => void handlePassTurn()}
-                className="mt-2 rounded px-3 py-1 text-xs font-semibold"
-                style={{ background: "var(--color-evento)", color: "var(--color-pergaminho)" }}
+                style={{
+                  padding: "6px 16px",
+                  borderRadius: 8,
+                  background: "var(--color-evento)",
+                  color: "var(--color-pergaminho)",
+                  fontFamily: "var(--font-title), serif",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  border: "none",
+                  cursor: "pointer",
+                }}
               >
                 Passar turno
               </button>
@@ -353,33 +470,30 @@ function MaoContent() {
           )}
 
           {isInProgress && !isCurrentNarrator && activeNarratorName && (
-            <p className="text-sm opacity-60 text-center">
-              {activeNarratorName} está narrando. Jogue uma carta de interrupção para assumir.
+            <p style={{ fontSize: 13, opacity: 0.55, textAlign: "center", margin: 0 }}>
+              {activeNarratorName} está narrando.{" "}
+              {hand.some((c) => c.interrupt) && "Jogue uma carta de interrupção para assumir."}
             </p>
           )}
 
           {isInProgress && !hasHand && (
-            <p className="opacity-50 text-sm text-center">
-              Aguardando distribuição das cartas...
+            <p style={{ opacity: 0.45, fontSize: 13, textAlign: "center", margin: 0 }}>
+              Aguardando distribuição das cartas…
             </p>
           )}
         </div>
 
-        {/* Card strip at bottom */}
+        {/* ── Card fan ── */}
         {isInProgress && hasHand && (
           <div
-            className="w-full"
             style={{
-              paddingBottom: 24,
+              flexShrink: 0,
+              paddingBottom: 16,
               paddingTop: 8,
               borderTop: "1px solid rgba(201,168,76,0.15)",
-              background: "rgba(0,0,0,0.3)",
-              overflowY: "visible",
+              background: "rgba(0,0,0,0.25)",
             }}
           >
-            <p className="text-center text-xs opacity-40 mb-2">
-              Toque para selecionar • Arraste para reordenar
-            </p>
             <CardFan
               cards={hand}
               onPlay={(card) => void handlePlayCard(card)}
@@ -390,39 +504,72 @@ function MaoContent() {
     );
   }
 
+  // Join form
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
+    <main
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100dvh",
+        overflow: "hidden",
+        padding: 32,
+        gap: 20,
+      }}
+    >
       <h1
-        className="text-4xl font-bold text-center"
-        style={{ color: "var(--color-dourado)", fontFamily: "var(--font-display), cursive" }}
+        style={{
+          color: "var(--color-dourado)",
+          fontFamily: "var(--font-display), cursive",
+          fontSize: 32,
+          textAlign: "center",
+          margin: 0,
+        }}
       >
         Era Uma Vez
       </h1>
-      <p className="opacity-80">
+      <p style={{ opacity: 0.7, margin: 0 }}>
         Sala: <strong>{salaCode}</strong>
       </p>
-      {error && <p className="text-sm text-red-400 text-center">{error}</p>}
-      <form onSubmit={handleJoin} className="flex flex-col gap-4 w-full max-w-xs">
+      {error && <p style={{ color: "#f87171", fontSize: 13, textAlign: "center" }}>{error}</p>}
+      <form
+        onSubmit={handleJoin}
+        style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 300 }}
+      >
         <input
           type="text"
           placeholder="Seu nome de herói..."
           value={playerName}
           onChange={(e) => setPlayerName(e.target.value)}
           maxLength={24}
-          className="w-full py-3 px-4 rounded-lg text-lg border-2 outline-none"
           style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: 10,
+            fontSize: 16,
+            border: "2px solid var(--color-dourado)",
             background: "transparent",
-            borderColor: "var(--color-dourado)",
             color: "var(--color-pergaminho)",
+            outline: "none",
+            boxSizing: "border-box",
           }}
         />
         <button
           type="submit"
           disabled={!playerName.trim() || loading}
-          className="w-full py-3 px-6 rounded-lg text-lg font-semibold transition-opacity disabled:opacity-40"
           style={{
+            width: "100%",
+            padding: "12px 24px",
+            borderRadius: 10,
+            fontSize: 16,
+            fontWeight: 700,
             background: "var(--color-evento)",
             color: "var(--color-pergaminho)",
+            border: "none",
+            cursor: "pointer",
+            opacity: !playerName.trim() || loading ? 0.45 : 1,
+            fontFamily: "var(--font-title), serif",
           }}
         >
           {loading ? "Entrando..." : "Entrar na Partida"}
