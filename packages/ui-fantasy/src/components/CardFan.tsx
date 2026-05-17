@@ -62,6 +62,7 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
           const zIndex = isFinal ? total + 10 : index;
           const isPlaying = playingCardId === card.id;
           const bgColor = CARD_TYPE_COLORS[card.tipo] ?? "#923c35";
+          const cardImageUrl = `/cards/${card.id}.png`;
 
           return (
             <motion.div
@@ -103,6 +104,31 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
                 zIndex,
               }}
             >
+              <img
+                src={cardImageUrl}
+                alt={card.texto_pt}
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                }}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: 10,
+                  zIndex: 0,
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: 10,
+                  background: "linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.15))",
+                  zIndex: 1,
+                }}
+              />
               <span
                 style={{
                   fontSize: 9,
@@ -110,6 +136,8 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
                   color: "rgba(255,255,255,0.7)",
                   textTransform: "uppercase",
                   letterSpacing: 1,
+                  position: "relative",
+                  zIndex: 2,
                 }}
               >
                 {card.tipo}
@@ -124,12 +152,14 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
                   display: "-webkit-box",
                   WebkitLineClamp: 4,
                   WebkitBoxOrient: "vertical" as const,
+                  position: "relative",
+                  zIndex: 2,
                 }}
               >
                 {card.texto_pt}
               </span>
               {isFinal && (
-                <span style={{ fontSize: 14 }}>⭐</span>
+                <span style={{ fontSize: 14, position: "relative", zIndex: 2 }}>⭐</span>
               )}
               <span
                 style={{
@@ -138,6 +168,7 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay }) => {
                   fontSize: 8,
                   color: "rgba(255,255,255,0.5)",
                   fontFamily: "var(--font-display), cursive",
+                  zIndex: 2,
                 }}
               >
                 ↑ deslizar

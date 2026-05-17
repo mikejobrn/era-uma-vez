@@ -213,12 +213,18 @@ function MaoContent() {
 
     const { data: room, error: roomError } = await supabase
       .from("rooms")
-      .select("id")
+      .select("id, status")
       .eq("code", salaCode)
       .single();
 
     if (roomError || !room) {
       setError("Sala não encontrada. Verifique o código e tente novamente.");
+      setLoading(false);
+      return;
+    }
+
+    if ((room as { status: Room["status"] }).status !== "lobby") {
+      setError("A partida já foi iniciada. Não é mais possível entrar nesta sala.");
       setLoading(false);
       return;
     }

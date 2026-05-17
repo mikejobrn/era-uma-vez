@@ -250,7 +250,7 @@ export default function MesaPage() {
         Era Uma Vez — Mesa
       </h1>
 
-      {roomCode && joinUrl ? (
+      {room?.status === "lobby" && roomCode && joinUrl ? (
         <div className="flex flex-col items-center gap-6">
           <p className="text-xl opacity-80">
             Sala:{" "}
@@ -270,6 +270,14 @@ export default function MesaPage() {
             Aponte a câmera do celular para o QR Code para entrar na partida.
           </p>
         </div>
+      ) : room?.status === "in_progress" ? (
+        <p className="opacity-70 text-center max-w-sm">
+          Partida em andamento. Entradas foram encerradas.
+        </p>
+      ) : room?.status === "finished" ? (
+        <p className="opacity-70 text-center max-w-sm">
+          Partida finalizada.
+        </p>
       ) : (
         <p className="opacity-60">Criando sala...</p>
       )}
@@ -332,7 +340,11 @@ export default function MesaPage() {
           >
             História
           </h2>
-          <StoryLog entries={storyLog} onUndo={room?.status === "in_progress" ? () => void handleUndo() : undefined} />
+          <StoryLog
+            entries={storyLog}
+            descending
+            onUndo={room?.status === "in_progress" ? () => void handleUndo() : undefined}
+          />
         </section>
       )}
 

@@ -148,6 +148,24 @@ describe("dealCards", () => {
     expect(result[0]!.name).toBe("Hero");
     expect(result[0]!.id).toBe("p1");
   });
+
+  it("limits each hand to at most one Final card", () => {
+    const deck = [
+      createCard({ id: "f1", tipo: "Final" }),
+      createCard({ id: "f2", tipo: "Final" }),
+      createCard({ id: "f3", tipo: "Final" }),
+      ...Array.from({ length: 24 }, (_, i) =>
+        createCard({ id: `card-${i}`, numero: i, tipo: "Personagem" }),
+      ),
+    ];
+    const players = [createPlayer({ id: "p1" }), createPlayer({ id: "p2" }), createPlayer({ id: "p3" })];
+    const result = dealCards(deck, players, 7);
+
+    result.forEach((player) => {
+      const finals = player.hand.filter((card) => card.tipo === "Final");
+      expect(finals.length).toBeLessThanOrEqual(1);
+    });
+  });
 });
 
 describe("checkVictory", () => {
