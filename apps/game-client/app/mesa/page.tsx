@@ -645,16 +645,28 @@ function generateMockDeck(): Card[] {
     interrupt: i % 5 === 0,
     prompt_en: "",
   }));
-  // Add a Final card
-  cards.push({
-    id: "mock-final",
-    deck: "A",
-    numero: 99,
-    tipo: "Final",
-    texto_pt: "E viveram felizes para sempre.",
-    texto_en: "And they all lived happily ever after.",
-    interrupt: false,
-    prompt_en: "",
+  // Add enough Final cards for up to 8 players (1 per player guaranteed)
+  const finalTexts = [
+    "E viveram felizes para sempre.",
+    "E assim termina nossa história.",
+    "E nunca mais foram vistos.",
+    "E a paz reinou para sempre.",
+    "E o mundo mudou para sempre.",
+    "E tudo voltou ao normal.",
+    "E o feitiço se desfez.",
+    "E o sol nasceu novamente.",
+  ];
+  finalTexts.forEach((text, i) => {
+    cards.push({
+      id: `mock-final-${i}`,
+      deck: "A",
+      numero: 90 + i,
+      tipo: "Final",
+      texto_pt: text,
+      texto_en: text,
+      interrupt: false,
+      prompt_en: "",
+    });
   });
   return cards;
 }

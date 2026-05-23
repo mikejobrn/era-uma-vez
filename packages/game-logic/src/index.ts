@@ -128,25 +128,53 @@ export function checkVictory(room: Room): PlayedCard | null {
 // ─── Deal Cards ───────────────────────────────────────────────────────────────
 
 /**
- * Shuffles the deck and distributes handSize cards to each player sequentially.
+ * Returns true if a "Final" card can be played.
+ * A Final card can only be played when it is the last card in the hand.
+ */
+export function canPlayFinalCard(hand: Card[]): boolean {
+  return hand.length === 1 && hand[0]?.tipo === "Final";
+}
+
+/**
+ * Returns true if a card from the hand can be played given the game rules.
+ * - Non-Final cards can always be played.
+ * - Final cards can only be played when they are the last card in hand.
+ */
+export function canPlayCard(card: Card, hand: Card[]): boolean {
+  if (card.tipo === "Final") {
+    return canPlayFinalCard(hand);
+  }
+  return true;
+}
+
+/**
+ * Shuffles the deck and distributes handSize cards to each player.
+ * Guarantees exactly 1 Final card per player.
  */
 export function dealCards(deck: Card[], players: Player[], handSize = 7): Player[] {
   const shuffled = [...deck].sort(() => Math.random() - 0.5);
-  let deckIndex = 0;
 
-  return players.map((player) => {
+  const finalCards = shuffled.filter((c) => c.tipo === "Final");
+  const normalCards = shuffled.filter((c) => c.tipo !== "Final");
+
+  // Shuffle final cards to randomize which final each player gets
+  const shuffledFinals = [...finalCards].sort(() => Math.random() - 0.5);
+
+  let normalIndex = 0;
+
+  return players.map((player, playerIndex) => {
     const hand: Card[] = [];
-    let hasFinalCard = false;
 
-    while (hand.length < handSize && deckIndex < shuffled.length) {
-      const card = shuffled[deckIndex++];
+    // Give exactly 1 Final card (if available)
+    const finalCard = shuffledFinals[playerIndex];
+    if (finalCard) {
+      hand.push(finalCard);
+    }
+
+    // Fill rest of hand with normal cards
+    while (hand.length < handSize && normalIndex < normalCards.length) {
+      const card = normalCards[normalIndex++];
       if (!card) break;
-
-      if (card.tipo === "Final") {
-        if (hasFinalCard) continue;
-        hasFinalCard = true;
-      }
-
       hand.push(card);
     }
 
