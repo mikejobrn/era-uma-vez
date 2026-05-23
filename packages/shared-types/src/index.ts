@@ -46,6 +46,8 @@ export interface Room {
   status: RoomStatus;
   narrator_id: string | null;
   story_log: PlayedCard[];
+  deck_type: CardDeck | null;
+  draw_pile: Card[];
   created_at: string;
 }
 

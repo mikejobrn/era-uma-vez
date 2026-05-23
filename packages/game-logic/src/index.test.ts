@@ -9,9 +9,12 @@ import {
   canPlayFinalCard,
   checkVictory,
   dealCards,
+  getHandSize,
   getCurrentNarrator,
   getNextNarrator,
   undoLastMove,
+  addCardToHand,
+  getLastPlayedCard,
 } from "./index";
 
 function createPlayer(overrides: Partial<Player>): Player {
@@ -93,6 +96,8 @@ function createRoom(overrides: Partial<Room>): Room {
     status: overrides.status ?? "in_progress",
     narrator_id: overrides.narrator_id ?? null,
     story_log: overrides.story_log ?? [],
+    deck_type: overrides.deck_type ?? null,
+    draw_pile: overrides.draw_pile ?? [],
     created_at: overrides.created_at ?? "2026-01-01T00:00:00.000Z",
   };
 }
@@ -259,5 +264,51 @@ describe("canPlayCard", () => {
     const finalCard = createCard({ tipo: "Final" });
     const hand = [finalCard];
     expect(canPlayCard(finalCard, hand)).toBe(true);
+  });
+});
+
+describe("getHandSize", () => {
+  it("returns 10 for 2 players", () => {
+    expect(getHandSize(2)).toBe(10);
+  });
+
+  it("returns 8 for 3 players", () => {
+    expect(getHandSize(3)).toBe(8);
+  });
+
+  it("returns 7 for 4 players", () => {
+    expect(getHandSize(4)).toBe(7);
+  });
+
+  it("returns 6 for 5 players", () => {
+    expect(getHandSize(5)).toBe(6);
+  });
+
+  it("returns 5 for 6 or more players", () => {
+    expect(getHandSize(6)).toBe(5);
+    expect(getHandSize(7)).toBe(5);
+    expect(getHandSize(10)).toBe(5);
+  });
+});
+
+describe("addCardToHand", () => {
+  it("adds a card to the hand", () => {
+    const hand = [createCard({ id: "c1" })];
+    const newCard = createCard({ id: "c2" });
+    const result = addCardToHand(hand, newCard);
+    expect(result).toHaveLength(2);
+    expect(result[1]!.id).toBe("c2");
+  });
+});
+
+describe("getLastPlayedCard", () => {
+  it("returns null for empty log", () => {
+    expect(getLastPlayedCard([])).toBeNull();
+  });
+
+  it("returns the last entry", () => {
+    const entry1 = createPlayedCard({ player_id: "p1" });
+    const entry2 = createPlayedCard({ player_id: "p2" });
+    expect(getLastPlayedCard([entry1, entry2])).toEqual(entry2);
   });
 });

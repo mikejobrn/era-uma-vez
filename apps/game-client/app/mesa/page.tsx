@@ -4,12 +4,15 @@ import {
   applyNarratorRotation,
   checkVictory,
   dealCards,
+  getHandSize,
   getCurrentNarrator,
+  getLastPlayedCard,
   getNextNarrator,
   undoLastMove,
+  addCardToHand,
 } from "@era-uma-vez/game-logic";
 import { TableCards } from "@era-uma-vez/ui-fantasy";
-import type { Card, PlayedCard, Player, Room } from "@era-uma-vez/shared-types";
+import type { Card, CardDeck, PlayedCard, Player, Room } from "@era-uma-vez/shared-types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "../../lib/supabase";
@@ -62,7 +65,14 @@ function generateRoomCode(): string {
   return Math.random().toString(36).substring(2, 7).toUpperCase();
 }
 
-type RoomFull = Pick<Room, "id" | "code" | "status" | "narrator_id" | "story_log">;
+type RoomFull = Pick<Room, "id" | "code" | "status" | "narrator_id" | "story_log" | "deck_type" | "draw_pile">;
+
+const MESA_SESSION_KEY = "era-uma-vez-mesa-session";
+
+interface MesaSession {
+  roomId: string;
+  roomCode: string;
+}
 
 export default function MesaPage() {
   const [roomCode, setRoomCode] = useState<string | null>(null);
@@ -72,9 +82,42 @@ export default function MesaPage() {
   const [roomError, setRoomError] = useState<string | null>(null);
   const [isAdvancingTurn, setIsAdvancingTurn] = useState(false);
   const [isStartingGame, setIsStartingGame] = useState(false);
+  const [selectedDeck, setSelectedDeck] = useState<CardDeck>("A");
+  const [availableDecks, setAvailableDecks] = useState<CardDeck[]>(["A", "B", "C"]);
   const confettiLaunched = useRef(false);
 
   useEffect(() => {
+    // Try restoring a previous mesa session
+    let restoredRoom = false;
+    try {
+      const raw = localStorage.getItem(MESA_SESSION_KEY);
+      if (raw) {
+        const saved: MesaSession = JSON.parse(raw);
+        if (saved.roomId && saved.roomCode) {
+          setRoomCode(saved.roomCode);
+          setJoinUrl(`${window.location.origin}/mao?sala=${saved.roomCode}`);
+          setRoom({ id: saved.roomId, code: saved.roomCode, status: "lobby", narrator_id: null, story_log: [], deck_type: null, draw_pile: [] });
+          restoredRoom = true;
+
+          // Re-fetch room state from DB
+          if (supabase) {
+            void supabase
+              .from("rooms")
+              .select("id, code, status, narrator_id, story_log, deck_type, draw_pile")
+              .eq("id", saved.roomId)
+              .single()
+              .then(({ data }) => {
+                if (data) setRoom(data as RoomFull);
+              });
+          }
+        }
+      }
+    } catch {
+      // ignore parse errors
+    }
+
+    if (restoredRoom) return;
+
     const code = generateRoomCode();
     setRoomCode(code);
     const url = `${window.location.origin}/mao?sala=${code}`;
@@ -85,15 +128,33 @@ export default function MesaPage() {
     void (async () => {
       const { data, error } = await supabase
         .from("rooms")
-        .insert({ code, status: "lobby", story_log: [] })
-        .select("id, code, status, narrator_id, story_log")
+        .insert({ code, status: "lobby", story_log: [], deck_type: null, draw_pile: [] })
+        .select("id, code, status, narrator_id, story_log, deck_type, draw_pile")
         .single();
       if (error) {
         setRoomError(formatRoomCreateError(error));
         return;
       }
-      if (data) setRoom(data as RoomFull);
+      if (data) {
+        const roomData = data as RoomFull;
+        setRoom(roomData);
+        localStorage.setItem(MESA_SESSION_KEY, JSON.stringify({ roomId: roomData.id, roomCode: code }));
+      }
     })();
+  }, []);
+
+  // Fetch available decks from DB
+  useEffect(() => {
+    if (!supabase) return;
+    void supabase
+      .from("cards")
+      .select("deck")
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const decks = [...new Set((data as { deck: CardDeck }[]).map((c) => c.deck))].sort();
+          if (decks.length > 0) setAvailableDecks(decks);
+        }
+      });
   }, []);
 
   useEffect(() => {
@@ -114,7 +175,7 @@ export default function MesaPage() {
     const fetchRoom = () => {
       void client
         .from("rooms")
-        .select("id, code, status, narrator_id, story_log")
+        .select("id, code, status, narrator_id, story_log, deck_type, draw_pile")
         .eq("id", room.id)
         .single()
         .then((result: { data: RoomFull | null }) => {
@@ -221,9 +282,9 @@ export default function MesaPage() {
 
     const client = supabase;
 
-    // Fetch cards from DB, fall back to mock deck if unavailable
+    // Fetch cards from DB filtered by selected deck, fall back to mock deck
     let deck: Card[] = [];
-    const { data: cardsData } = await client.from("cards").select("*");
+    const { data: cardsData } = await client.from("cards").select("*").eq("deck", selectedDeck);
     if (cardsData && cardsData.length > 0) {
       deck = cardsData as Card[];
     } else {
@@ -231,14 +292,19 @@ export default function MesaPage() {
       deck = generateMockDeck();
     }
 
-    const dealtPlayers = dealCards(deck, players, 7);
+    const handSize = getHandSize(players.length);
+    const dealtPlayers = dealCards(deck, players, handSize);
+
+    // Build a draw pile from remaining cards (cards not dealt to any player)
+    const dealtCardIds = new Set(dealtPlayers.flatMap((p) => p.hand.map((c) => c.id)));
+    const drawPile = deck.filter((c) => !dealtCardIds.has(c.id)).sort(() => Math.random() - 0.5);
 
     const updates = dealtPlayers.map((player) =>
       client.from("players").update({ hand: player.hand }).eq("id", player.id),
     );
 
     const [roomResult, ...playerResults] = await Promise.all([
-      client.from("rooms").update({ status: "in_progress" }).eq("id", room.id),
+      client.from("rooms").update({ status: "in_progress", deck_type: selectedDeck, draw_pile: drawPile }).eq("id", room.id),
       ...updates,
     ]);
 
@@ -252,12 +318,61 @@ export default function MesaPage() {
 
   async function handleUndo() {
     if (!room || !supabase) return;
+    const lastEntry = getLastPlayedCard(storyLog);
     const newLog = undoLastMove(storyLog);
-    const { error } = await supabase
-      .from("rooms")
-      .update({ story_log: newLog })
-      .eq("id", room.id);
+
+    const client = supabase;
+    const roomUpdate = client.from("rooms").update({ story_log: newLog }).eq("id", room.id);
+
+    // Return the card to the player who played it
+    if (lastEntry) {
+      const player = players.find((p) => p.id === lastEntry.player_id);
+      if (player) {
+        const updatedHand = addCardToHand(player.hand, lastEntry.card);
+        const [roomResult, playerResult] = await Promise.all([
+          roomUpdate,
+          client.from("players").update({ hand: updatedHand }).eq("id", player.id),
+        ]);
+        if (roomResult.error || playerResult.error) {
+          setRoomError("Não foi possível desfazer a jogada.");
+        }
+        return;
+      }
+    }
+
+    const { error } = await roomUpdate;
     if (error) setRoomError("Não foi possível desfazer a jogada.");
+  }
+
+  async function handleAdvanceTurnWithDraw() {
+    if (!room || !supabase) return;
+
+    const currentNarrator = getCurrentNarrator(players, room.narrator_id);
+    if (!currentNarrator) return;
+
+    setIsAdvancingTurn(true);
+    setRoomError(null);
+
+    // Draw a card from the draw pile for the current narrator
+    const drawPile = room.draw_pile ?? [];
+    if (drawPile.length > 0) {
+      const drawnCard = drawPile[0]!;
+      const newDrawPile = drawPile.slice(1);
+      const updatedHand = addCardToHand(currentNarrator.hand, drawnCard);
+
+      await Promise.all([
+        supabase.from("players").update({ hand: updatedHand }).eq("id", currentNarrator.id),
+        supabase.from("rooms").update({ draw_pile: newDrawPile }).eq("id", room.id),
+      ]);
+    }
+
+    // Now advance the turn
+    const nextNarrator = getNextNarrator(players, room.narrator_id);
+    if (nextNarrator) {
+      await persistNarratorTurn(room.id, players, nextNarrator.id, setRoomError);
+    }
+
+    setIsAdvancingTurn(false);
   }
 
   const connectedPlayers = players.filter((player) => player.status !== "disconnected");
@@ -273,8 +388,8 @@ export default function MesaPage() {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 10,
-        padding: "8px 16px",
+        gap: 8,
+        padding: "4px 12px",
         borderBottom: "1px solid rgba(201,168,76,0.2)",
         flexShrink: 0,
         flexWrap: "wrap",
@@ -286,9 +401,9 @@ export default function MesaPage() {
         style={{
           color: "var(--color-dourado)",
           fontFamily: "var(--font-display), cursive",
-          fontSize: 20,
+          fontSize: 16,
           lineHeight: 1,
-          marginRight: 4,
+          marginRight: 2,
         }}
       >
         Era Uma Vez
@@ -300,12 +415,12 @@ export default function MesaPage() {
           style={{
             color: "var(--color-dourado)",
             fontFamily: "var(--font-title), serif",
-            fontSize: 13,
+            fontSize: 11,
             opacity: 0.85,
             letterSpacing: 2,
             border: "1px solid rgba(201,168,76,0.35)",
-            borderRadius: 6,
-            padding: "2px 8px",
+            borderRadius: 4,
+            padding: "1px 6px",
           }}
         >
           {roomCode}
@@ -314,16 +429,16 @@ export default function MesaPage() {
 
       {/* Player count */}
       {connectedPlayers.length > 0 && (
-        <span style={{ fontSize: 12, opacity: 0.6 }}>
-          {connectedPlayers.length} jogador{connectedPlayers.length !== 1 ? "es" : ""}
+        <span style={{ fontSize: 11, opacity: 0.6 }}>
+          {connectedPlayers.length}👤
         </span>
       )}
 
       {/* Narrator */}
       {activeNarrator && (
-        <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: 4 }}>
-          <CrownIcon size={14} color="var(--color-dourado)" />
-          <span style={{ fontSize: 13, fontWeight: 600 }}>{activeNarrator.name}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+          <CrownIcon size={12} color="var(--color-dourado)" />
+          <span style={{ fontSize: 12, fontWeight: 600 }}>{activeNarrator.name}</span>
         </div>
       )}
 
@@ -343,21 +458,21 @@ export default function MesaPage() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 5,
-            padding: "6px 14px",
-            borderRadius: 8,
+            gap: 4,
+            padding: "4px 12px",
+            borderRadius: 6,
             background: "var(--color-dourado)",
             color: "var(--color-fundo)",
             fontFamily: "var(--font-title), serif",
             fontWeight: 700,
-            fontSize: 13,
+            fontSize: 12,
             border: "none",
             cursor: "pointer",
             opacity: isStartingGame ? 0.5 : 1,
           }}
         >
-          <SparkleIcon size={14} color="var(--color-fundo)" />
-          {isStartingGame ? "Iniciando…" : "Iniciar Partida"}
+          <SparkleIcon size={12} color="var(--color-fundo)" />
+          {isStartingGame ? "Iniciando…" : "Iniciar"}
         </button>
       )}
 
@@ -365,26 +480,26 @@ export default function MesaPage() {
       {isInProgress && (
         <button
           type="button"
-          onClick={() => void handleAdvanceTurn()}
+          onClick={() => void handleAdvanceTurnWithDraw()}
           disabled={!canAdvanceTurn || isAdvancingTurn}
-          title="Passar turno"
+          title="Passar turno (puxa carta)"
           style={{
             display: "flex",
             alignItems: "center",
             gap: 4,
-            padding: "6px 12px",
-            borderRadius: 8,
+            padding: "4px 10px",
+            borderRadius: 6,
             background: "var(--color-evento)",
             color: "var(--color-pergaminho)",
             fontFamily: "var(--font-title), serif",
             fontWeight: 600,
-            fontSize: 12,
+            fontSize: 11,
             border: "none",
             cursor: canAdvanceTurn ? "pointer" : "not-allowed",
             opacity: !canAdvanceTurn || isAdvancingTurn ? 0.45 : 1,
           }}
         >
-          <SkipIcon size={14} color="var(--color-pergaminho)" />
+          <SkipIcon size={12} color="var(--color-pergaminho)" />
           {isAdvancingTurn ? "…" : "Turno"}
         </button>
       )}
@@ -399,15 +514,15 @@ export default function MesaPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "6px 10px",
-            borderRadius: 8,
+            padding: "4px 8px",
+            borderRadius: 6,
             background: "rgba(120,80,30,0.35)",
             color: "var(--color-dourado)",
             border: "1px solid rgba(201,168,76,0.4)",
             cursor: "pointer",
           }}
         >
-          <UndoIcon size={14} color="var(--color-dourado)" />
+          <UndoIcon size={12} color="var(--color-dourado)" />
         </button>
       )}
     </div>
@@ -495,7 +610,7 @@ export default function MesaPage() {
           gap: 16,
         }}
       >
-        {/* Lobby: QR Code */}
+        {/* Lobby: QR Code + Deck Selection */}
         {room?.status === "lobby" && joinUrl && (
           <div
             style={{
@@ -524,6 +639,33 @@ export default function MesaPage() {
             <p style={{ fontSize: 12, opacity: 0.5, textAlign: "center", margin: 0 }}>
               Aponte a câmera para entrar na sala
             </p>
+
+            {/* Deck selection */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, marginTop: 8 }}>
+              <p style={{ fontSize: 12, opacity: 0.7, margin: 0 }}>Escolha o deck:</p>
+              <div style={{ display: "flex", gap: 8 }}>
+                {availableDecks.map((deck) => (
+                  <button
+                    key={deck}
+                    type="button"
+                    onClick={() => setSelectedDeck(deck)}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 8,
+                      background: selectedDeck === deck ? "var(--color-dourado)" : "rgba(255,255,255,0.08)",
+                      color: selectedDeck === deck ? "var(--color-fundo)" : "var(--color-pergaminho)",
+                      border: selectedDeck === deck ? "none" : "1px solid rgba(201,168,76,0.4)",
+                      fontFamily: "var(--font-title), serif",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Deck {deck}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
