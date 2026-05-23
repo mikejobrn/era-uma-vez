@@ -74,6 +74,18 @@ function MaoContent() {
 
     if (!room || !players) return;
 
+    // If this player no longer exists in the room (e.g. host restarted with "modify players"),
+    // clear session and go back to join form
+    if (!playerData) {
+      localStorage.removeItem(SESSION_KEY);
+      setSession(null);
+      setJoined(false);
+      setHand([]);
+      setWinner(null);
+      setRoomStatus(null);
+      return;
+    }
+
     const typedRoom = room as Room;
     const typedPlayers = players as Player[];
 
@@ -92,9 +104,7 @@ function MaoContent() {
         .map((p) => ({ id: p.id, name: p.name, hand: p.hand })),
     );
 
-    if (playerData) {
-      setHand((playerData as { hand: Card[] }).hand ?? []);
-    }
+    setHand((playerData as { hand: Card[] }).hand ?? []);
 
     const victory = checkVictory(typedRoom);
     if (victory) {

@@ -2,6 +2,13 @@
   "name": "@era-uma-vez/game-client",
   "version": "0.1.0",
   "private": true,
+  "browserslist": [
+    "chrome 90",
+    "firefox 90",
+    "safari 15",
+    "edge 90",
+    "ios_saf 15"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

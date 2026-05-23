@@ -419,6 +419,19 @@ export default function MesaPage() {
       }
     }
 
+    // If modifying players, delete all players so everyone must rejoin
+    if (mode === "modify_players") {
+      const [roomResult, deleteResult] = await Promise.all([
+        client.from("rooms").update({ status: "lobby", story_log: [], draw_pile: [], narrator_id: null }).eq("id", room.id),
+        client.from("players").delete().eq("room_id", room.id),
+      ]);
+      if (roomResult.error || deleteResult.error) {
+        setRoomError("Não foi possível reiniciar o jogo.");
+      }
+      setIsRestarting(false);
+      return;
+    }
+
     // Reset all players and room to lobby state
     const playerResets = players.map((p) =>
       client.from("players").update({ hand: [], is_narrator: false, status: "waiting" }).eq("id", p.id),
