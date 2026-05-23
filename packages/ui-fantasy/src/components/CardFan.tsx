@@ -44,7 +44,7 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay, disableFinal }) => {
     : null;
 
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
       {/* Full-screen overlay when a card is selected */}
       {selectedCard && (
         <>
@@ -140,7 +140,9 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay, disableFinal }) => {
           justifyContent: "center",
           padding: "8px 12px",
           overflowY: "auto",
-          maxHeight: "50dvh",
+          flex: 1,
+          minHeight: 0,
+          alignContent: "flex-start",
         }}
       >
         {cards.map((card) => {
@@ -217,7 +219,7 @@ export const CardFan: FC<CardFanProps> = ({ cards, onPlay, disableFinal }) => {
           );
         })}
       </div>
-    </>
+    </div>
   );
 };
 
