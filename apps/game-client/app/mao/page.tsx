@@ -3,6 +3,7 @@
 import {
   appendToStoryLog,
   canInterrupt,
+  canPlayCard,
   checkVictory,
   getCurrentNarrator,
   removeCardFromHand,
@@ -128,6 +129,7 @@ function MaoContent() {
 
   async function handlePlayCard(card: Card) {
     if (!session || !supabase || isPlayingCard) return;
+    if (!canPlayCard(card, hand)) return;
     setIsPlayingCard(true);
 
     const client = supabase;
@@ -477,6 +479,7 @@ function MaoContent() {
             <CardFan
               cards={hand}
               onPlay={(card) => void handlePlayCard(card)}
+              disableFinal={hand.length > 1 && hand.some((c) => c.tipo === "Final")}
             />
           </div>
         )}

@@ -5,6 +5,8 @@ import type { Card, Player, PlayedCard, Room } from "@era-uma-vez/shared-types";
 import {
   applyNarratorRotation,
   canInterrupt,
+  canPlayCard,
+  canPlayFinalCard,
   checkVictory,
   dealCards,
   getCurrentNarrator,
@@ -118,7 +120,10 @@ describe("canInterrupt", () => {
 
 describe("dealCards", () => {
   it("distributes the correct number of cards to each player", () => {
-    const deck = Array.from({ length: 20 }, (_, i) => createCard({ id: `card-${i}`, numero: i }));
+    const deck = [
+      ...Array.from({ length: 3 }, (_, i) => createCard({ id: `final-${i}`, tipo: "Final" })),
+      ...Array.from({ length: 20 }, (_, i) => createCard({ id: `card-${i}`, numero: i })),
+    ];
     const players = [
       createPlayer({ id: "p1" }),
       createPlayer({ id: "p2" }),
@@ -129,7 +134,10 @@ describe("dealCards", () => {
   });
 
   it("gives each player distinct cards", () => {
-    const deck = Array.from({ length: 20 }, (_, i) => createCard({ id: `card-${i}`, numero: i }));
+    const deck = [
+      ...Array.from({ length: 3 }, (_, i) => createCard({ id: `final-${i}`, tipo: "Final" })),
+      ...Array.from({ length: 20 }, (_, i) => createCard({ id: `card-${i}`, numero: i })),
+    ];
     const players = [
       createPlayer({ id: "p1" }),
       createPlayer({ id: "p2" }),
@@ -142,14 +150,17 @@ describe("dealCards", () => {
   });
 
   it("preserves other player properties", () => {
-    const deck = Array.from({ length: 10 }, (_, i) => createCard({ id: `card-${i}`, numero: i }));
+    const deck = [
+      createCard({ id: "f1", tipo: "Final" }),
+      ...Array.from({ length: 10 }, (_, i) => createCard({ id: `card-${i}`, numero: i })),
+    ];
     const players = [createPlayer({ id: "p1", name: "Hero" })];
     const result = dealCards(deck, players, 5);
     expect(result[0]!.name).toBe("Hero");
     expect(result[0]!.id).toBe("p1");
   });
 
-  it("limits each hand to at most one Final card", () => {
+  it("guarantees exactly 1 Final card per player when enough finals exist", () => {
     const deck = [
       createCard({ id: "f1", tipo: "Final" }),
       createCard({ id: "f2", tipo: "Final" }),
@@ -163,7 +174,21 @@ describe("dealCards", () => {
 
     result.forEach((player) => {
       const finals = player.hand.filter((card) => card.tipo === "Final");
-      expect(finals.length).toBeLessThanOrEqual(1);
+      expect(finals.length).toBe(1);
+    });
+  });
+
+  it("gives at most 1 Final card per player even with many finals in deck", () => {
+    const deck = [
+      ...Array.from({ length: 10 }, (_, i) => createCard({ id: `f-${i}`, tipo: "Final" })),
+      ...Array.from({ length: 20 }, (_, i) => createCard({ id: `card-${i}`, numero: i, tipo: "Personagem" })),
+    ];
+    const players = [createPlayer({ id: "p1" }), createPlayer({ id: "p2" })];
+    const result = dealCards(deck, players, 7);
+
+    result.forEach((player) => {
+      const finals = player.hand.filter((card) => card.tipo === "Final");
+      expect(finals.length).toBe(1);
     });
   });
 });
@@ -198,5 +223,41 @@ describe("undoLastMove", () => {
     const result = undoLastMove([entry1, entry2]);
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(entry1);
+  });
+});
+
+describe("canPlayFinalCard", () => {
+  it("returns true when the hand has only a Final card", () => {
+    const hand = [createCard({ tipo: "Final" })];
+    expect(canPlayFinalCard(hand)).toBe(true);
+  });
+
+  it("returns false when the hand has multiple cards", () => {
+    const hand = [createCard({ tipo: "Final" }), createCard({ tipo: "Personagem" })];
+    expect(canPlayFinalCard(hand)).toBe(false);
+  });
+
+  it("returns false when the hand is empty", () => {
+    expect(canPlayFinalCard([])).toBe(false);
+  });
+});
+
+describe("canPlayCard", () => {
+  it("allows playing non-Final cards regardless of hand size", () => {
+    const card = createCard({ tipo: "Personagem" });
+    const hand = [card, createCard({ tipo: "Final" }), createCard({ tipo: "Evento" })];
+    expect(canPlayCard(card, hand)).toBe(true);
+  });
+
+  it("blocks Final card when hand has other cards", () => {
+    const finalCard = createCard({ tipo: "Final" });
+    const hand = [finalCard, createCard({ tipo: "Personagem" })];
+    expect(canPlayCard(finalCard, hand)).toBe(false);
+  });
+
+  it("allows Final card when it is the only card in hand", () => {
+    const finalCard = createCard({ tipo: "Final" });
+    const hand = [finalCard];
+    expect(canPlayCard(finalCard, hand)).toBe(true);
   });
 });
