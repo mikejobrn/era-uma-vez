@@ -91,6 +91,8 @@ export default function MesaPage() {
   const [isAdvancingTurn, setIsAdvancingTurn] = useState(false);
   const [isStartingGame, setIsStartingGame] = useState(false);
   const [isRestarting, setIsRestarting] = useState(false);
+  const [showRestartModal, setShowRestartModal] = useState(false);
+  const [restartEditNames, setRestartEditNames] = useState<Record<string, string>>({});
   const [selectedDeck, setSelectedDeck] = useState<CardDeck>("A");
   const [availableDecks, setAvailableDecks] = useState<CardDeck[]>(["A", "B", "C"]);
   const confettiLaunched = useRef(false);
@@ -384,16 +386,40 @@ export default function MesaPage() {
     setIsAdvancingTurn(false);
   }
 
-  async function handleRestartGame() {
+  function handleRestartGame() {
     if (!room || !supabase) return;
-    if (!window.confirm("Reiniciar o jogo? As mãos e o histórico serão apagados.")) return;
+    setRestartEditNames(Object.fromEntries(players.map((p) => [p.id, p.name])));
+    setShowRestartModal(true);
+  }
 
+  async function executeRestart(mode: "keep" | "edit_names" | "modify_players") {
+    if (!room || !supabase) return;
+
+    setShowRestartModal(false);
     setIsRestarting(true);
     setRoomError(null);
     confettiLaunched.current = false;
 
     const client = supabase;
 
+    // If editing names, update player names first
+    if (mode === "edit_names") {
+      const nameUpdates = players
+        .filter((p) => restartEditNames[p.id] && restartEditNames[p.id]!.trim() !== p.name)
+        .map((p) =>
+          client.from("players").update({ name: restartEditNames[p.id]!.trim() }).eq("id", p.id),
+        );
+      if (nameUpdates.length > 0) {
+        const results = await Promise.all(nameUpdates);
+        if (results.some((r) => r.error)) {
+          setRoomError("Não foi possível atualizar os apelidos.");
+          setIsRestarting(false);
+          return;
+        }
+      }
+    }
+
+    // Reset all players and room to lobby state
     const playerResets = players.map((p) =>
       client.from("players").update({ hand: [], is_narrator: false, status: "waiting" }).eq("id", p.id),
     );
@@ -588,69 +614,254 @@ export default function MesaPage() {
     </div>
   );
 
+  // ── Restart modal ────────────────────────────────────────────────────────────
+  const restartModal = showRestartModal && (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(0,0,0,0.7)",
+      }}
+      onClick={() => setShowRestartModal(false)}
+    >
+      <div
+        style={{
+          background: "var(--color-fundo)",
+          border: "1px solid rgba(201,168,76,0.5)",
+          borderRadius: 14,
+          padding: "24px 28px",
+          maxWidth: 400,
+          width: "90%",
+          maxHeight: "80dvh",
+          overflowY: "auto",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2
+          style={{
+            color: "var(--color-dourado)",
+            fontFamily: "var(--font-display), cursive",
+            fontSize: 20,
+            margin: "0 0 16px",
+            textAlign: "center",
+          }}
+        >
+          Reiniciar Jogo
+        </h2>
+
+        {/* Option 1: Keep and redistribute */}
+        <button
+          type="button"
+          onClick={() => void executeRestart("keep")}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            marginBottom: 10,
+            borderRadius: 8,
+            background: "rgba(201,168,76,0.15)",
+            color: "var(--color-dourado)",
+            border: "1px solid rgba(201,168,76,0.4)",
+            fontFamily: "var(--font-title), serif",
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: "pointer",
+            textAlign: "left",
+          }}
+        >
+          🔄 Manter jogadores e redistribuir cartas
+        </button>
+
+        {/* Option 2: Edit nicknames */}
+        <button
+          type="button"
+          onClick={() => {
+            const editSection = document.getElementById("restart-edit-names");
+            if (editSection) {
+              editSection.style.display = editSection.style.display === "none" ? "block" : "none";
+            }
+          }}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            marginBottom: 10,
+            borderRadius: 8,
+            background: "rgba(120,80,30,0.25)",
+            color: "var(--color-pergaminho)",
+            border: "1px solid rgba(201,168,76,0.3)",
+            fontFamily: "var(--font-title), serif",
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: "pointer",
+            textAlign: "left",
+          }}
+        >
+          ✏️ Editar apelidos dos jogadores
+        </button>
+
+        {/* Inline edit names section */}
+        <div id="restart-edit-names" style={{ display: "none", marginBottom: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "8px 0" }}>
+            {players.map((p) => (
+              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 12, opacity: 0.6, minWidth: 20 }}>👤</span>
+                <input
+                  type="text"
+                  value={restartEditNames[p.id] ?? p.name}
+                  onChange={(e) =>
+                    setRestartEditNames((prev) => ({ ...prev, [p.id]: e.target.value }))
+                  }
+                  style={{
+                    flex: 1,
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    background: "rgba(255,255,255,0.08)",
+                    color: "var(--color-pergaminho)",
+                    border: "1px solid rgba(201,168,76,0.3)",
+                    fontFamily: "var(--font-title), serif",
+                    fontSize: 13,
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => void executeRestart("edit_names")}
+            style={{
+              width: "100%",
+              padding: "10px 16px",
+              marginTop: 8,
+              borderRadius: 8,
+              background: "var(--color-dourado)",
+              color: "var(--color-fundo)",
+              border: "none",
+              fontFamily: "var(--font-title), serif",
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            Salvar e reiniciar
+          </button>
+        </div>
+
+        {/* Option 3: Modify players (back to lobby) */}
+        <button
+          type="button"
+          onClick={() => void executeRestart("modify_players")}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            marginBottom: 10,
+            borderRadius: 8,
+            background: "rgba(100,150,200,0.15)",
+            color: "#93c5fd",
+            border: "1px solid rgba(147,197,253,0.3)",
+            fontFamily: "var(--font-title), serif",
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: "pointer",
+            textAlign: "left",
+          }}
+        >
+          👥 Modificar jogadores (voltar ao lobby)
+        </button>
+
+        {/* Cancel */}
+        <button
+          type="button"
+          onClick={() => setShowRestartModal(false)}
+          style={{
+            width: "100%",
+            padding: "10px 16px",
+            borderRadius: 8,
+            background: "transparent",
+            color: "var(--color-pergaminho)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            fontFamily: "var(--font-title), serif",
+            fontSize: 13,
+            cursor: "pointer",
+            opacity: 0.7,
+          }}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  );
+
   // ── Victory screen ──────────────────────────────────────────────────────────
   if (winner) {
     return (
-      <main
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100dvh",
-          overflow: "hidden",
-          background: "var(--color-fundo)",
-        }}
-      >
-        {topBar}
-        <div
+      <>
+        {restartModal}
+        <main
           style={{
-            flex: 1,
             display: "flex",
             flexDirection: "column",
-            overflowY: "auto",
-            padding: "20px 24px",
-            gap: 20,
+            height: "100dvh",
+            overflow: "hidden",
+            background: "var(--color-fundo)",
           }}
         >
-          <div style={{ textAlign: "center" }}>
-            <TrophyIcon size={48} />
-            <h1
-              style={{
-                color: "var(--color-dourado)",
-                fontFamily: "var(--font-display), cursive",
-                fontSize: 28,
-                margin: "8px 0 4px",
-              }}
-            >
-              Fim da História!
-            </h1>
-            <p style={{ opacity: 0.8, margin: "0 0 4px" }}>
-              <strong>{winner.player_name}</strong> encerrou com:
-            </p>
-            <p
-              style={{
-                color: "var(--color-dourado)",
-                fontStyle: "italic",
-                fontSize: 14,
-                margin: 0,
-              }}
-            >
-              &ldquo;{winner.card.texto_pt}&rdquo;
-            </p>
-            <p style={{ opacity: 0.5, fontSize: 12, margin: "8px 0 0" }}>
-              E viveram felizes para sempre.
-            </p>
+          {topBar}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              overflowY: "auto",
+              padding: "20px 24px",
+              gap: 20,
+            }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <TrophyIcon size={48} />
+              <h1
+                style={{
+                  color: "var(--color-dourado)",
+                  fontFamily: "var(--font-display), cursive",
+                  fontSize: 28,
+                  margin: "8px 0 4px",
+                }}
+              >
+                Fim da História!
+              </h1>
+              <p style={{ opacity: 0.8, margin: "0 0 4px" }}>
+                <strong>{winner.player_name}</strong> encerrou com:
+              </p>
+              <p
+                style={{
+                  color: "var(--color-dourado)",
+                  fontStyle: "italic",
+                  fontSize: 14,
+                  margin: 0,
+                }}
+              >
+                &ldquo;{winner.card.texto_pt}&rdquo;
+              </p>
+              <p style={{ opacity: 0.5, fontSize: 12, margin: "8px 0 0" }}>
+                E viveram felizes para sempre.
+              </p>
+            </div>
+            <TableCards entries={storyLog} />
           </div>
-          <TableCards entries={storyLog} />
-        </div>
-      </main>
+        </main>
+      </>
     );
   }
 
   // ── Normal game screen ──────────────────────────────────────────────────────
   return (
-    <main
-      style={{
-        display: "flex",
+    <>
+      {restartModal}
+      <main
+        style={{
+          display: "flex",
         flexDirection: "column",
         height: "100dvh",
         overflow: "hidden",
@@ -766,6 +977,7 @@ export default function MesaPage() {
         )}
       </div>
     </main>
+    </>
   );
 }
 
