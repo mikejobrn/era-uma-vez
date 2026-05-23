@@ -51,6 +51,14 @@ function SparkleIcon({ size = 15, color = "currentColor" }: { size?: number; col
   );
 }
 
+function RestartIcon({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+      <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+    </svg>
+  );
+}
+
 function TrophyIcon({ size = 40, color = "#c9a84c" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden="true" style={{ display: "block" }}>
@@ -82,6 +90,7 @@ export default function MesaPage() {
   const [roomError, setRoomError] = useState<string | null>(null);
   const [isAdvancingTurn, setIsAdvancingTurn] = useState(false);
   const [isStartingGame, setIsStartingGame] = useState(false);
+  const [isRestarting, setIsRestarting] = useState(false);
   const [selectedDeck, setSelectedDeck] = useState<CardDeck>("A");
   const [availableDecks, setAvailableDecks] = useState<CardDeck[]>(["A", "B", "C"]);
   const confettiLaunched = useRef(false);
@@ -375,6 +384,33 @@ export default function MesaPage() {
     setIsAdvancingTurn(false);
   }
 
+  async function handleRestartGame() {
+    if (!room || !supabase) return;
+    if (!window.confirm("Reiniciar o jogo? As mãos e o histórico serão apagados.")) return;
+
+    setIsRestarting(true);
+    setRoomError(null);
+    confettiLaunched.current = false;
+
+    const client = supabase;
+
+    const playerResets = players.map((p) =>
+      client.from("players").update({ hand: [], is_narrator: false, status: "waiting" }).eq("id", p.id),
+    );
+
+    const [roomResult, ...playerResults] = await Promise.all([
+      client.from("rooms").update({ status: "lobby", story_log: [], draw_pile: [], narrator_id: null }).eq("id", room.id),
+      ...playerResets,
+    ]);
+
+    const failedPlayer = playerResults.find((r) => r.error);
+    if (roomResult.error || failedPlayer?.error) {
+      setRoomError("Não foi possível reiniciar o jogo.");
+    }
+
+    setIsRestarting(false);
+  }
+
   const connectedPlayers = players.filter((player) => player.status !== "disconnected");
   const canAdvanceTurn = connectedPlayers.length > 1;
   const canStartGame =
@@ -523,6 +559,30 @@ export default function MesaPage() {
           }}
         >
           <UndoIcon size={12} color="var(--color-dourado)" />
+        </button>
+      )}
+
+      {/* Restart */}
+      {(isInProgress || room?.status === "finished") && (
+        <button
+          type="button"
+          onClick={() => void handleRestartGame()}
+          disabled={isRestarting}
+          title="Reiniciar jogo"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "4px 8px",
+            borderRadius: 6,
+            background: "rgba(180,40,40,0.25)",
+            color: "#f87171",
+            border: "1px solid rgba(248,113,113,0.4)",
+            cursor: isRestarting ? "not-allowed" : "pointer",
+            opacity: isRestarting ? 0.5 : 1,
+          }}
+        >
+          <RestartIcon size={12} color="#f87171" />
         </button>
       )}
     </div>
