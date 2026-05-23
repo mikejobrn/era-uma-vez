@@ -30,6 +30,7 @@ function MaoContent() {
   const [playerName, setPlayerName] = useState("");
   const [joined, setJoined] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeNarratorName, setActiveNarratorName] = useState<string | null>(null);
@@ -46,20 +47,87 @@ function MaoContent() {
   const [drawPile, setDrawPile] = useState<Card[]>([]);
 
   useEffect(() => {
-    if (!salaCode) return;
-    try {
-      const raw = localStorage.getItem(SESSION_KEY);
-      if (raw) {
+    let cancelled = false;
+
+    async function restoreSession() {
+      if (!salaCode) {
+        setIsRestoringSession(false);
+        return;
+      }
+
+      setIsRestoringSession(true);
+
+      try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) {
+          if (!cancelled) {
+            setSession(null);
+            setJoined(false);
+            setPlayerName("");
+          }
+          return;
+        }
+
         const saved: Session = JSON.parse(raw);
-        if (saved.roomCode === salaCode) {
+        if (saved.roomCode !== salaCode) {
+          if (!cancelled) {
+            setSession(null);
+            setJoined(false);
+            setPlayerName("");
+          }
+          return;
+        }
+
+        if (!supabase) {
+          if (!cancelled) {
+            setSession(saved);
+            setPlayerName(saved.playerName);
+            setJoined(true);
+          }
+          return;
+        }
+
+        const { data: player } = await supabase
+          .from("players")
+          .select("id")
+          .eq("id", saved.playerId)
+          .eq("room_id", saved.roomId)
+          .maybeSingle();
+
+        if (!player) {
+          localStorage.removeItem(SESSION_KEY);
+          if (!cancelled) {
+            setSession(null);
+            setJoined(false);
+            setPlayerName("");
+          }
+          return;
+        }
+
+        if (!cancelled) {
           setSession(saved);
           setPlayerName(saved.playerName);
           setJoined(true);
         }
+      } catch {
+        localStorage.removeItem(SESSION_KEY);
+        if (!cancelled) {
+          setSession(null);
+          setJoined(false);
+          setPlayerName("");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsRestoringSession(false);
+        }
       }
-    } catch {
-      // ignore parse errors
     }
+
+    void restoreSession();
+
+    return () => {
+      cancelled = true;
+    };
   }, [salaCode]);
 
   const syncRoomState = useCallback(async () => {
@@ -80,6 +148,7 @@ function MaoContent() {
       localStorage.removeItem(SESSION_KEY);
       setSession(null);
       setJoined(false);
+      setPlayerName("");
       setHand([]);
       setWinner(null);
       setRoomStatus(null);
@@ -319,6 +388,24 @@ function MaoContent() {
         <p style={{ opacity: 0.6, textAlign: "center" }}>
           Nenhuma sala encontrada. Escaneie o QR Code da Mesa para entrar.
         </p>
+      </main>
+    );
+  }
+
+  if (isRestoringSession) {
+    return (
+      <main
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100dvh",
+          overflow: "hidden",
+          padding: 32,
+        }}
+      >
+        <p style={{ opacity: 0.6, textAlign: "center" }}>Verificando sua entrada na sala…</p>
       </main>
     );
   }
