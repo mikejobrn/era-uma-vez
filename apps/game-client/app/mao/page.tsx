@@ -205,6 +205,16 @@ function MaoContent() {
       )
       .subscribe();
 
+    // Presence channel – announces this player is online so the mesa can detect disconnections
+    const presenceChannel = client.channel(`presence-${session.roomId}`, {
+      config: { presence: { key: session.playerId } },
+    });
+    presenceChannel.subscribe(async (status) => {
+      if (status === "SUBSCRIBED") {
+        await presenceChannel.track({ player_id: session.playerId });
+      }
+    });
+
     // Re-sync state when tab becomes visible again (handles screen lock/unlock, tab switch)
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
@@ -216,6 +226,7 @@ function MaoContent() {
     return () => {
       void client.removeChannel(roomChannel);
       void client.removeChannel(playersChannel);
+      void client.removeChannel(presenceChannel);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [session?.playerId, session?.roomId, syncRoomState]);
