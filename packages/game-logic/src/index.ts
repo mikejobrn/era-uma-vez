@@ -143,7 +143,8 @@ export function checkVictory(room: Room): PlayedCard | null {
 // ─── Deal Cards ───────────────────────────────────────────────────────────────
 
 /**
- * Returns the number of cards each player should receive based on player count.
+ * Returns the number of non-Final (story) cards each player should receive based on player count.
+ * The Final card is distributed separately and does not count toward this amount.
  * 2 players → 10 cards each
  * 3 players → 8 cards each
  * 4 players → 7 cards each
@@ -180,7 +181,7 @@ export function canPlayCard(card: Card, hand: Card[]): boolean {
 }
 
 /**
- * Shuffles the deck and distributes handSize cards to each player.
+ * Shuffles the deck and distributes handSize non-Final cards to each player.
  * Guarantees exactly 1 Final card per player.
  */
 export function dealCards(deck: Card[], players: Player[], handSize = 7): Player[] {
@@ -203,8 +204,10 @@ export function dealCards(deck: Card[], players: Player[], handSize = 7): Player
       hand.push(finalCard);
     }
 
+    const totalTargetCards = handSize + (finalCard ? 1 : 0);
+
     // Fill rest of hand with normal cards
-    while (hand.length < handSize && normalIndex < normalCards.length) {
+    while (hand.length < totalTargetCards && normalIndex < normalCards.length) {
       const card = normalCards[normalIndex++];
       if (!card) break;
       hand.push(card);

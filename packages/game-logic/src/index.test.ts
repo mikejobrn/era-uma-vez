@@ -124,7 +124,7 @@ describe("canInterrupt", () => {
 });
 
 describe("dealCards", () => {
-  it("distributes the correct number of cards to each player", () => {
+  it("distributes base cards plus one Final card to each player", () => {
     const deck = [
       ...Array.from({ length: 3 }, (_, i) => createCard({ id: `final-${i}`, tipo: "Final" })),
       ...Array.from({ length: 20 }, (_, i) => createCard({ id: `card-${i}`, numero: i })),
@@ -134,8 +134,10 @@ describe("dealCards", () => {
       createPlayer({ id: "p2" }),
     ];
     const result = dealCards(deck, players, 7);
-    expect(result[0]!.hand).toHaveLength(7);
-    expect(result[1]!.hand).toHaveLength(7);
+    expect(result[0]!.hand).toHaveLength(8);
+    expect(result[1]!.hand).toHaveLength(8);
+    expect(result[0]!.hand.filter((card) => card.tipo === "Final")).toHaveLength(1);
+    expect(result[1]!.hand.filter((card) => card.tipo === "Final")).toHaveLength(1);
   });
 
   it("gives each player distinct cards", () => {
