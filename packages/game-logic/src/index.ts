@@ -73,6 +73,13 @@ export function removeCardFromHand(hand: Card[], cardId: string): Card[] {
 }
 
 /**
+ * Adds a card to a player's hand and returns the updated hand.
+ */
+export function addCardToHand(hand: Card[], card: Card): Card[] {
+  return [...hand, card];
+}
+
+/**
  * Returns true if the player has a "Final" (ending) card in hand.
  */
 export function hasEndingCard(hand: Card[]): boolean {
@@ -112,6 +119,14 @@ export function undoLastMove(log: PlayedCard[]): PlayedCard[] {
   return log.slice(0, -1);
 }
 
+/**
+ * Returns the last played card entry from the story log, or null if empty.
+ */
+export function getLastPlayedCard(log: PlayedCard[]): PlayedCard | null {
+  if (log.length === 0) return null;
+  return log[log.length - 1] ?? null;
+}
+
 // ─── Victory Check ────────────────────────────────────────────────────────────
 
 /**
@@ -126,6 +141,23 @@ export function checkVictory(room: Room): PlayedCard | null {
 }
 
 // ─── Deal Cards ───────────────────────────────────────────────────────────────
+
+/**
+ * Returns the number of cards each player should receive based on player count.
+ * 2 players → 10 cards each
+ * 3 players → 8 cards each
+ * 4 players → 7 cards each
+ * 5 players → 6 cards each
+ * 6+ players → 5 cards each
+ */
+export function getHandSize(playerCount: number): number {
+  if (playerCount <= 1) return 10;
+  if (playerCount === 2) return 10;
+  if (playerCount === 3) return 8;
+  if (playerCount === 4) return 7;
+  if (playerCount === 5) return 6;
+  return 5;
+}
 
 /**
  * Returns true if a "Final" card can be played.

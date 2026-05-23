@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  addCardToHand,
   appendToStoryLog,
   canInterrupt,
   canPlayCard,
@@ -40,6 +41,9 @@ function MaoContent() {
   const [winner, setWinner] = useState<PlayedCard | null>(null);
   const [isPlayingCard, setIsPlayingCard] = useState(false);
   const [otherPlayers, setOtherPlayers] = useState<Pick<Player, "id" | "name" | "hand">[]>([]);
+  const [drawnCard, setDrawnCard] = useState<Card | null>(null);
+  const [isPassingTurn, setIsPassingTurn] = useState(false);
+  const [drawPile, setDrawPile] = useState<Card[]>([]);
 
   useEffect(() => {
     if (!salaCode) return;
@@ -63,7 +67,7 @@ function MaoContent() {
     const client = supabase;
 
     const [{ data: room }, { data: players }, { data: playerData }] = await Promise.all([
-      client.from("rooms").select("id, code, status, narrator_id, story_log").eq("id", session.roomId).single(),
+      client.from("rooms").select("id, code, status, narrator_id, story_log, draw_pile").eq("id", session.roomId).single(),
       client.from("players").select("id, room_id, name, avatar_url, is_narrator, status, hand, joined_at").eq("room_id", session.roomId).order("joined_at", { ascending: true }),
       client.from("players").select("hand").eq("id", session.playerId).single(),
     ]);
@@ -79,6 +83,7 @@ function MaoContent() {
     setRoomStatus(typedRoom.status);
     setStoryLog(typedRoom.story_log ?? []);
     setRoomNarratorId(typedRoom.narrator_id);
+    setDrawPile(typedRoom.draw_pile ?? []);
 
     // Store other players (everyone except self)
     setOtherPlayers(
@@ -121,9 +126,18 @@ function MaoContent() {
       )
       .subscribe();
 
+    // Re-sync state when tab becomes visible again (handles screen lock/unlock, tab switch)
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void syncRoomState();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
       void client.removeChannel(roomChannel);
       void client.removeChannel(playersChannel);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [session?.playerId, session?.roomId, syncRoomState]);
 
@@ -173,12 +187,48 @@ function MaoContent() {
   }
 
   async function handlePassTurn() {
-    if (!session || !supabase) return;
-    // Narrator passes turn — handled by Mesa; here we just signal via rooms
+    if (!session || !supabase || isPassingTurn) return;
+    setIsPassingTurn(true);
+
+    // Draw a card from the draw pile
+    if (drawPile.length > 0) {
+      const card = drawPile[0]!;
+      const newDrawPile = drawPile.slice(1);
+      const updatedHand = addCardToHand(hand, card);
+
+      await Promise.all([
+        supabase.from("players").update({ hand: updatedHand }).eq("id", session.playerId),
+        supabase.from("rooms").update({ draw_pile: newDrawPile }).eq("id", session.roomId),
+      ]);
+
+      setHand(updatedHand);
+      setDrawPile(newDrawPile);
+      setDrawnCard(card);
+    }
+
+    // Signal turn pass
     await supabase
       .from("rooms")
       .update({ narrator_id: null })
       .eq("id", session.roomId);
+
+    setIsPassingTurn(false);
+  }
+
+  async function handleDiscardCard(card: Card) {
+    if (!session || !supabase) return;
+    const newHand = removeCardFromHand(hand, card.id);
+    // Put discarded card at the bottom of draw pile
+    const newDrawPile = [...drawPile, card];
+
+    await Promise.all([
+      supabase.from("players").update({ hand: newHand }).eq("id", session.playerId),
+      supabase.from("rooms").update({ draw_pile: newDrawPile }).eq("id", session.roomId),
+    ]);
+
+    setHand(newHand);
+    setDrawPile(newDrawPile);
+    setDrawnCard(null);
   }
 
   async function handleJoin(e: React.FormEvent) {
@@ -315,165 +365,176 @@ function MaoContent() {
           background: "var(--color-fundo)",
         }}
       >
-        {/* ── Header ── */}
+        {/* ── Compact Header ── */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "8px 14px",
+            padding: "4px 10px",
             borderBottom: "1px solid rgba(201,168,76,0.2)",
             flexShrink: 0,
           }}
         >
-          <p
+          <span
             style={{
               fontFamily: "var(--font-display), cursive",
               color: "var(--color-dourado)",
               fontWeight: 700,
-              fontSize: 16,
-              margin: 0,
+              fontSize: 13,
             }}
           >
             {session.playerName}
-          </p>
-          {activeNarratorName && (
-            <p style={{ fontSize: 13, opacity: 0.8, margin: 0 }}>
-              👑 {activeNarratorName}
-            </p>
-          )}
-        </div>
-
-        {/* ── Other players strip ── */}
-        {otherPlayers.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 8,
-              padding: "6px 14px",
-              borderBottom: "1px solid rgba(201,168,76,0.1)",
-              flexShrink: 0,
-              overflowX: "auto",
-            }}
-          >
-            {otherPlayers.map((p) => (
-              <div
-                key={p.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5,
-                  padding: "3px 8px",
-                  borderRadius: 20,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
-                }}
-              >
-                <span style={{ fontSize: 12, opacity: 0.8 }}>{p.name}</span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: "var(--color-dourado)",
-                    fontWeight: 600,
-                  }}
-                >
-                  {p.hand?.length ?? 0} 🃏
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ── Middle: status messages ── */}
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "8px 16px",
-            gap: 10,
-            minHeight: 0,
-          }}
-        >
-          {!isInProgress && (
-            <div style={{ textAlign: "center" }}>
-              <h2
-                style={{
-                  color: "var(--color-dourado)",
-                  fontFamily: "var(--font-display), cursive",
-                  fontSize: 22,
-                  margin: "0 0 6px",
-                }}
-              >
-                Aguardando…
-              </h2>
-              <p style={{ opacity: 0.6, fontSize: 13, margin: 0 }}>
-                Aguarde o início da partida na Mesa.
-              </p>
-            </div>
-          )}
-
-          {isInProgress && isCurrentNarrator && (
-            <div
-              style={{
-                padding: "10px 16px",
-                borderRadius: 10,
-                background: "rgba(201,168,76,0.12)",
-                border: "1px solid rgba(201,168,76,0.4)",
-                textAlign: "center",
-              }}
-            >
-              <p style={{ color: "var(--color-dourado)", fontWeight: 600, fontSize: 14, margin: "0 0 8px" }}>
-                👑 É a sua vez de narrar!
-              </p>
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {activeNarratorName && (
+              <span style={{ fontSize: 11, opacity: 0.8 }}>
+                👑 {activeNarratorName}
+              </span>
+            )}
+            {isInProgress && isCurrentNarrator && (
               <button
                 type="button"
                 onClick={() => void handlePassTurn()}
+                disabled={isPassingTurn}
                 style={{
-                  padding: "6px 16px",
-                  borderRadius: 8,
+                  padding: "3px 10px",
+                  borderRadius: 6,
                   background: "var(--color-evento)",
                   color: "var(--color-pergaminho)",
                   fontFamily: "var(--font-title), serif",
                   fontWeight: 600,
-                  fontSize: 13,
+                  fontSize: 11,
                   border: "none",
                   cursor: "pointer",
+                  opacity: isPassingTurn ? 0.5 : 1,
                 }}
               >
-                Passar turno
+                {isPassingTurn ? "…" : "Passar turno"}
               </button>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
 
-          {isInProgress && !isCurrentNarrator && activeNarratorName && (
-            <p style={{ fontSize: 13, opacity: 0.55, textAlign: "center", margin: 0 }}>
+        {/* ── Drawn card notification + discard option ── */}
+        {drawnCard && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              padding: "6px 10px",
+              background: "rgba(201,168,76,0.1)",
+              borderBottom: "1px solid rgba(201,168,76,0.2)",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: 12, color: "var(--color-dourado)" }}>
+              Você puxou: &ldquo;{drawnCard.texto_pt}&rdquo;
+            </span>
+            <button
+              type="button"
+              onClick={() => void handleDiscardCard(drawnCard)}
+              style={{
+                padding: "2px 8px",
+                borderRadius: 4,
+                background: "rgba(248,113,113,0.2)",
+                color: "#f87171",
+                border: "1px solid rgba(248,113,113,0.4)",
+                fontSize: 10,
+                cursor: "pointer",
+              }}
+            >
+              Descartar
+            </button>
+            <button
+              type="button"
+              onClick={() => setDrawnCard(null)}
+              style={{
+                padding: "2px 8px",
+                borderRadius: 4,
+                background: "rgba(201,168,76,0.2)",
+                color: "var(--color-dourado)",
+                border: "1px solid rgba(201,168,76,0.4)",
+                fontSize: 10,
+                cursor: "pointer",
+              }}
+            >
+              Manter
+            </button>
+          </div>
+        )}
+
+        {/* ── Middle: status messages (only when no cards) ── */}
+        {(!isInProgress || !hasHand) && (
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "8px 16px",
+              gap: 8,
+              minHeight: 0,
+            }}
+          >
+            {!isInProgress && (
+              <div style={{ textAlign: "center" }}>
+                <h2
+                  style={{
+                    color: "var(--color-dourado)",
+                    fontFamily: "var(--font-display), cursive",
+                    fontSize: 20,
+                    margin: "0 0 4px",
+                  }}
+                >
+                  Aguardando…
+                </h2>
+                <p style={{ opacity: 0.6, fontSize: 12, margin: 0 }}>
+                  Aguarde o início da partida na Mesa.
+                </p>
+              </div>
+            )}
+
+            {isInProgress && !hasHand && (
+              <p style={{ opacity: 0.45, fontSize: 12, textAlign: "center", margin: 0 }}>
+                Aguardando distribuição das cartas…
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ── Inline status when has cards ── */}
+        {isInProgress && hasHand && !isCurrentNarrator && activeNarratorName && (
+          <div style={{ padding: "4px 10px", flexShrink: 0 }}>
+            <p style={{ fontSize: 11, opacity: 0.55, textAlign: "center", margin: 0 }}>
               {activeNarratorName} está narrando.{" "}
               {hand.some((c) => c.interrupt) && "Jogue uma carta de interrupção para assumir."}
             </p>
-          )}
+          </div>
+        )}
 
-          {isInProgress && !hasHand && (
-            <p style={{ opacity: 0.45, fontSize: 13, textAlign: "center", margin: 0 }}>
-              Aguardando distribuição das cartas…
+        {isInProgress && hasHand && isCurrentNarrator && (
+          <div style={{ padding: "4px 10px", flexShrink: 0, textAlign: "center" }}>
+            <p style={{ color: "var(--color-dourado)", fontWeight: 600, fontSize: 12, margin: 0 }}>
+              👑 É a sua vez de narrar!
             </p>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* ── Card fan ── */}
+        {/* ── Card fan (maximized) ── */}
         {isInProgress && hasHand && (
           <div
             style={{
-              flexShrink: 0,
-              paddingBottom: 16,
-              paddingTop: 8,
+              flex: 1,
+              minHeight: 0,
+              paddingBottom: 8,
+              paddingTop: 4,
               borderTop: "1px solid rgba(201,168,76,0.15)",
               background: "rgba(0,0,0,0.25)",
+              overflow: "hidden",
             }}
           >
             <CardFan
