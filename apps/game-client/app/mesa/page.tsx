@@ -92,7 +92,6 @@ export default function MesaPage() {
   const [isStartingGame, setIsStartingGame] = useState(false);
   const [isRestarting, setIsRestarting] = useState(false);
   const [showRestartModal, setShowRestartModal] = useState(false);
-  const [restartEditNames, setRestartEditNames] = useState<Record<string, string>>({});
   const [selectedDeck, setSelectedDeck] = useState<CardDeck>("A");
   const [availableDecks, setAvailableDecks] = useState<CardDeck[]>(["A", "B", "C"]);
   const confettiLaunched = useRef(false);
@@ -412,11 +411,10 @@ export default function MesaPage() {
 
   function handleRestartGame() {
     if (!room || !supabase) return;
-    setRestartEditNames(Object.fromEntries(players.map((p) => [p.id, p.name])));
     setShowRestartModal(true);
   }
 
-  async function executeRestart(mode: "keep" | "edit_names" | "modify_players") {
+  async function executeRestart() {
     if (!room || !supabase) return;
 
     setShowRestartModal(false);
@@ -426,57 +424,13 @@ export default function MesaPage() {
 
     const client = supabase;
 
-    // If editing names, update player names first
-    if (mode === "edit_names") {
-      const nameUpdates = players
-        .filter((p) => restartEditNames[p.id] && restartEditNames[p.id]!.trim() !== p.name)
-        .map((p) =>
-          client.from("players").update({ name: restartEditNames[p.id]!.trim() }).eq("id", p.id),
-        );
-      if (nameUpdates.length > 0) {
-        const results = await Promise.all(nameUpdates);
-        if (results.some((r) => r.error)) {
-          setRoomError("Não foi possível atualizar os apelidos.");
-          setIsRestarting(false);
-          return;
-        }
-      }
-    }
-
-    // If modifying players, delete all players so everyone must rejoin
-    if (mode === "modify_players") {
-      const [roomResult, deleteResult] = await Promise.all([
-        client.from("rooms").update({ status: "lobby", story_log: [], draw_pile: [], narrator_id: null }).eq("id", room.id),
-        client.from("players").delete().eq("room_id", room.id),
-      ]);
-      if (roomResult.error || deleteResult.error) {
-        setRoomError("Não foi possível reiniciar o jogo.");
-      }
-      setIsRestarting(false);
-      return;
-    }
-
-    // Reset all players and room to lobby state.
-    // Mark players who are not present (offline) as disconnected so they don't block the restart.
-    const playerResets = players.map((p) => {
-      const isOnline = onlinePlayerIds.size === 0 || onlinePlayerIds.has(p.id);
-      return client
-        .from("players")
-        .update({
-          hand: [],
-          is_narrator: false,
-          status: isOnline ? "waiting" : "disconnected",
-        })
-        .eq("id", p.id);
-    });
-
-    const [roomResult, ...playerResults] = await Promise.all([
+    // Always drop all players when returning to lobby, forcing a fresh login.
+    const [roomResult, deleteResult] = await Promise.all([
       client.from("rooms").update({ status: "lobby", story_log: [], draw_pile: [], narrator_id: null }).eq("id", room.id),
-      ...playerResets,
+      client.from("players").delete().eq("room_id", room.id),
     ]);
 
-    const failedPlayer = playerResults.find((r) => r.error);
-    if (roomResult.error || failedPlayer?.error) {
+    if (roomResult.error || deleteResult.error) {
       setRoomError("Não foi possível reiniciar o jogo.");
     }
 
@@ -705,10 +659,13 @@ export default function MesaPage() {
           Reiniciar Jogo
         </h2>
 
-        {/* Option 1: Keep and redistribute */}
+        <p style={{ fontSize: 13, lineHeight: 1.4, opacity: 0.8, margin: "0 0 14px" }}>
+          Ao reiniciar e voltar ao lobby, todos os jogadores serão desconectados e precisarão entrar novamente.
+        </p>
+
         <button
           type="button"
-          onClick={() => void executeRestart("keep")}
+          onClick={() => void executeRestart()}
           style={{
             width: "100%",
             padding: "12px 16px",
@@ -724,103 +681,7 @@ export default function MesaPage() {
             textAlign: "left",
           }}
         >
-          🔄 Manter jogadores e redistribuir cartas
-        </button>
-
-        {/* Option 2: Edit nicknames */}
-        <button
-          type="button"
-          onClick={() => {
-            const editSection = document.getElementById("restart-edit-names");
-            if (editSection) {
-              editSection.style.display = editSection.style.display === "none" ? "block" : "none";
-            }
-          }}
-          style={{
-            width: "100%",
-            padding: "12px 16px",
-            marginBottom: 10,
-            borderRadius: 8,
-            background: "rgba(120,80,30,0.25)",
-            color: "var(--color-pergaminho)",
-            border: "1px solid rgba(201,168,76,0.3)",
-            fontFamily: "var(--font-title), serif",
-            fontWeight: 600,
-            fontSize: 14,
-            cursor: "pointer",
-            textAlign: "left",
-          }}
-        >
-          ✏️ Editar apelidos dos jogadores
-        </button>
-
-        {/* Inline edit names section */}
-        <div id="restart-edit-names" style={{ display: "none", marginBottom: 10 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "8px 0" }}>
-            {players.map((p) => (
-              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 12, opacity: 0.6, minWidth: 20 }}>👤</span>
-                <input
-                  type="text"
-                  value={restartEditNames[p.id] ?? p.name}
-                  onChange={(e) =>
-                    setRestartEditNames((prev) => ({ ...prev, [p.id]: e.target.value }))
-                  }
-                  style={{
-                    flex: 1,
-                    padding: "6px 10px",
-                    borderRadius: 6,
-                    background: "rgba(255,255,255,0.08)",
-                    color: "var(--color-pergaminho)",
-                    border: "1px solid rgba(201,168,76,0.3)",
-                    fontFamily: "var(--font-title), serif",
-                    fontSize: 13,
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => void executeRestart("edit_names")}
-            style={{
-              width: "100%",
-              padding: "10px 16px",
-              marginTop: 8,
-              borderRadius: 8,
-              background: "var(--color-dourado)",
-              color: "var(--color-fundo)",
-              border: "none",
-              fontFamily: "var(--font-title), serif",
-              fontWeight: 700,
-              fontSize: 13,
-              cursor: "pointer",
-            }}
-          >
-            Salvar e reiniciar
-          </button>
-        </div>
-
-        {/* Option 3: Modify players (back to lobby) */}
-        <button
-          type="button"
-          onClick={() => void executeRestart("modify_players")}
-          style={{
-            width: "100%",
-            padding: "12px 16px",
-            marginBottom: 10,
-            borderRadius: 8,
-            background: "rgba(100,150,200,0.15)",
-            color: "#93c5fd",
-            border: "1px solid rgba(147,197,253,0.3)",
-            fontFamily: "var(--font-title), serif",
-            fontWeight: 600,
-            fontSize: 14,
-            cursor: "pointer",
-            textAlign: "left",
-          }}
-        >
-          👥 Modificar jogadores (voltar ao lobby)
+          ↩️ Voltar ao lobby e desconectar todos
         </button>
 
         {/* Cancel */}
