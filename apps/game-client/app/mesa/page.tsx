@@ -13,7 +13,7 @@ import {
 } from "@era-uma-vez/game-logic";
 import { TableCards } from "@era-uma-vez/ui-fantasy";
 import type { Card, CardDeck, PlayedCard, Player, Room } from "@era-uma-vez/shared-types";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "../../lib/supabase";
 
@@ -96,6 +96,7 @@ export default function MesaPage() {
   const [selectedDeck, setSelectedDeck] = useState<CardDeck>("A");
   const [availableDecks, setAvailableDecks] = useState<CardDeck[]>(["A", "B", "C"]);
   const confettiLaunched = useRef(false);
+  const [onlinePlayerIds, setOnlinePlayerIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     // Try restoring a previous mesa session
@@ -237,6 +238,29 @@ export default function MesaPage() {
       void client.removeChannel(roomsChannel);
     };
   }, [room?.id]);
+
+  // ── Presence tracking: observe which players are actually online ──────────
+  const updatePresence = useCallback((presenceState: Record<string, unknown[]>) => {
+    const ids = new Set<string>(Object.keys(presenceState));
+    setOnlinePlayerIds(ids);
+  }, []);
+
+  useEffect(() => {
+    if (!supabase || !room?.id) return;
+    const client = supabase;
+
+    const presenceChannel = client.channel(`presence-${room.id}`);
+
+    presenceChannel
+      .on("presence", { event: "sync" }, () => {
+        updatePresence(presenceChannel.presenceState());
+      })
+      .subscribe();
+
+    return () => {
+      void client.removeChannel(presenceChannel);
+    };
+  }, [room?.id, updatePresence]);
 
   const activeNarrator = useMemo(
     () => getCurrentNarrator(players, room?.narrator_id ?? null),
@@ -432,10 +456,19 @@ export default function MesaPage() {
       return;
     }
 
-    // Reset all players and room to lobby state
-    const playerResets = players.map((p) =>
-      client.from("players").update({ hand: [], is_narrator: false, status: "waiting" }).eq("id", p.id),
-    );
+    // Reset all players and room to lobby state.
+    // Mark players who are not present (offline) as disconnected so they don't block the restart.
+    const playerResets = players.map((p) => {
+      const isOnline = onlinePlayerIds.size === 0 || onlinePlayerIds.has(p.id);
+      return client
+        .from("players")
+        .update({
+          hand: [],
+          is_narrator: false,
+          status: isOnline ? "waiting" : "disconnected",
+        })
+        .eq("id", p.id);
+    });
 
     const [roomResult, ...playerResults] = await Promise.all([
       client.from("rooms").update({ status: "lobby", story_log: [], draw_pile: [], narrator_id: null }).eq("id", room.id),
@@ -450,7 +483,13 @@ export default function MesaPage() {
     setIsRestarting(false);
   }
 
-  const connectedPlayers = players.filter((player) => player.status !== "disconnected");
+  // A player is "connected" if their DB status is not disconnected AND they are in the
+  // presence channel (or presence hasn't synced yet, i.e. onlinePlayerIds is empty).
+  const connectedPlayers = players.filter(
+    (player) =>
+      player.status !== "disconnected" &&
+      (onlinePlayerIds.size === 0 || onlinePlayerIds.has(player.id)),
+  );
   const canAdvanceTurn = connectedPlayers.length > 1;
   const canStartGame =
     room?.status === "lobby" && connectedPlayers.length >= 2 && !isStartingGame;
