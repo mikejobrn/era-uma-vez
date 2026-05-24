@@ -7,6 +7,7 @@ import {
   canPlayCard,
   checkVictory,
   getCurrentNarrator,
+  getNextNarrator,
   removeCardFromHand,
 } from "@era-uma-vez/game-logic";
 import { CardFan } from "@era-uma-vez/ui-fantasy";
@@ -42,8 +43,10 @@ function MaoContent() {
   const [winner, setWinner] = useState<PlayedCard | null>(null);
   const [isPlayingCard, setIsPlayingCard] = useState(false);
   const [otherPlayers, setOtherPlayers] = useState<Pick<Player, "id" | "name" | "hand">[]>([]);
+  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
   const [drawnCard, setDrawnCard] = useState<Card | null>(null);
   const [isPassingTurn, setIsPassingTurn] = useState(false);
+  const [isChoosingDiscard, setIsChoosingDiscard] = useState(false);
   const [drawPile, setDrawPile] = useState<Card[]>([]);
 
   useEffect(() => {
@@ -165,6 +168,7 @@ function MaoContent() {
     setStoryLog(typedRoom.story_log ?? []);
     setRoomNarratorId(typedRoom.narrator_id);
     setDrawPile(typedRoom.draw_pile ?? []);
+    setAllPlayers(typedPlayers);
 
     // Store other players (everyone except self)
     setOtherPlayers(
@@ -294,15 +298,38 @@ function MaoContent() {
       setHand(updatedHand);
       setDrawPile(newDrawPile);
       setDrawnCard(card);
+      setIsChoosingDiscard(true);
+    } else {
+      // No cards to draw – just advance turn
+      await advanceToNextNarrator();
     }
 
-    // Signal turn pass
-    await supabase
-      .from("rooms")
-      .update({ narrator_id: null })
-      .eq("id", session.roomId);
-
     setIsPassingTurn(false);
+  }
+
+  async function advanceToNextNarrator() {
+    if (!session || !supabase) return;
+
+    // Determine next narrator based on join order
+    const nextNarrator = getNextNarrator(allPlayers, session.playerId);
+    if (nextNarrator) {
+      await Promise.all([
+        supabase.from("rooms").update({ narrator_id: nextNarrator.id }).eq("id", session.roomId),
+        supabase
+          .from("players")
+          .update({ is_narrator: false, status: "waiting" })
+          .eq("id", session.playerId),
+        supabase
+          .from("players")
+          .update({ is_narrator: true, status: "active" })
+          .eq("id", nextNarrator.id),
+      ]);
+    } else {
+      await supabase
+        .from("rooms")
+        .update({ narrator_id: null })
+        .eq("id", session.roomId);
+    }
   }
 
   async function handleDiscardCard(card: Card) {
@@ -319,6 +346,19 @@ function MaoContent() {
     setHand(newHand);
     setDrawPile(newDrawPile);
     setDrawnCard(null);
+    setIsChoosingDiscard(false);
+
+    // After discarding, advance to next narrator
+    await advanceToNextNarrator();
+  }
+
+  async function handleKeepAllCards() {
+    if (!session || !supabase) return;
+    setDrawnCard(null);
+    setIsChoosingDiscard(false);
+
+    // Player chose not to discard – advance to next narrator
+    await advanceToNextNarrator();
   }
 
   async function handleJoin(e: React.FormEvent) {
@@ -500,7 +540,7 @@ function MaoContent() {
                 👑 {activeNarratorName}
               </span>
             )}
-            {isInProgress && isCurrentNarrator && (
+            {isInProgress && isCurrentNarrator && !isChoosingDiscard && (
               <button
                 type="button"
                 onClick={() => void handlePassTurn()}
@@ -524,53 +564,63 @@ function MaoContent() {
           </div>
         </div>
 
-        {/* ── Drawn card notification + discard option ── */}
-        {drawnCard && (
+        {/* ── Discard selection after drawing a card ── */}
+        {isChoosingDiscard && drawnCard && (
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              padding: "6px 10px",
+              padding: "8px 10px",
               background: "rgba(201,168,76,0.1)",
               borderBottom: "1px solid rgba(201,168,76,0.2)",
               flexShrink: 0,
             }}
           >
-            <span style={{ fontSize: 12, color: "var(--color-dourado)" }}>
-              Você puxou: &ldquo;{drawnCard.texto_pt}&rdquo;
-            </span>
-            <button
-              type="button"
-              onClick={() => void handleDiscardCard(drawnCard)}
-              style={{
-                padding: "2px 8px",
-                borderRadius: 4,
-                background: "rgba(248,113,113,0.2)",
-                color: "#f87171",
-                border: "1px solid rgba(248,113,113,0.4)",
-                fontSize: 10,
-                cursor: "pointer",
-              }}
-            >
-              Descartar
-            </button>
-            <button
-              type="button"
-              onClick={() => setDrawnCard(null)}
-              style={{
-                padding: "2px 8px",
-                borderRadius: 4,
-                background: "rgba(201,168,76,0.2)",
-                color: "var(--color-dourado)",
-                border: "1px solid rgba(201,168,76,0.4)",
-                fontSize: 10,
-                cursor: "pointer",
-              }}
-            >
-              Manter
-            </button>
+            <p style={{ fontSize: 12, color: "var(--color-dourado)", margin: "0 0 6px", textAlign: "center" }}>
+              Você puxou: &ldquo;{drawnCard.texto_pt}&rdquo;. Escolha uma carta para descartar:
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "center" }}>
+              {hand
+                .filter((c) => c.tipo !== "Final")
+                .map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => void handleDiscardCard(c)}
+                    style={{
+                      padding: "3px 8px",
+                      borderRadius: 4,
+                      background: c.id === drawnCard.id ? "rgba(248,113,113,0.3)" : "rgba(201,168,76,0.15)",
+                      color: c.id === drawnCard.id ? "#f87171" : "var(--color-dourado)",
+                      border: `1px solid ${c.id === drawnCard.id ? "rgba(248,113,113,0.5)" : "rgba(201,168,76,0.3)"}`,
+                      fontSize: 10,
+                      cursor: "pointer",
+                      maxWidth: 120,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    title={c.texto_pt}
+                  >
+                    {c.texto_pt}
+                  </button>
+                ))}
+            </div>
+            <div style={{ textAlign: "center", marginTop: 6 }}>
+              <button
+                type="button"
+                onClick={() => void handleKeepAllCards()}
+                style={{
+                  padding: "2px 8px",
+                  borderRadius: 4,
+                  background: "rgba(201,168,76,0.2)",
+                  color: "var(--color-dourado)",
+                  border: "1px solid rgba(201,168,76,0.4)",
+                  fontSize: 10,
+                  cursor: "pointer",
+                }}
+              >
+                Manter todas
+              </button>
+            </div>
           </div>
         )}
 
